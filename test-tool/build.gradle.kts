@@ -1,6 +1,7 @@
 plugins {
 	`java-library`
 	`maven-publish`
+	signing
 }
 
 dependencies {
@@ -47,4 +48,8 @@ publishing {
 			}
 		}
 	}
+}
+
+signing {
+	sign(publishing.publications["mavenJava"])
 }
