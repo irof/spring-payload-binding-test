@@ -24,8 +24,7 @@ publishing {
 			pom {
 				name = "Spring Payload Binding Test"
 				description = "Spring MVC endpoint request/response payload binding contract test tool"
-				// TODO: set to real project URL before publishing to Maven Central
-				url = "https://example.com/spring-payload-binding-test"
+				url = "https://github.com/irof/spring-payload-binding-test"
 
 				licenses {
 					license {
@@ -35,16 +34,15 @@ publishing {
 				}
 				developers {
 					developer {
-						// TODO: replace with real developer info before publishing to Maven Central
-						id = "example"
-						name = "Example"
+						id = "irof"
+						name = "irof"
+						email = "irof.ocean@gmail.com"
 					}
 				}
 				scm {
-					// TODO: replace with real SCM URLs before publishing to Maven Central
-					url = "https://example.com/spring-payload-binding-test"
-					connection = "scm:git:https://example.com/spring-payload-binding-test.git"
-					developerConnection = "scm:git:ssh://example.com/spring-payload-binding-test.git"
+					url = "https://github.com/irof/spring-payload-binding-test"
+					connection = "scm:git:https://github.com/irof/spring-payload-binding-test.git"
+					developerConnection = "scm:git:ssh://git@github.com/irof/spring-payload-binding-test.git"
 				}
 			}
 		}
