@@ -1,0 +1,28 @@
+{
+  "items" : [ {
+    "id" : "sample",
+    "title" : "sample",
+    "owner" : {
+      "name" : "sample",
+      "contact" : {
+        "email" : "sample",
+        "phone" : "sample"
+      }
+    },
+    "tasks" : [ {
+      "id" : "sample",
+      "title" : "sample",
+      "priority" : "LOW",
+      "subtasks" : [ {
+        "title" : "sample",
+        "done" : true
+      } ]
+    } ]
+  } ],
+  "page" : {
+    "number" : 1,
+    "size" : 1,
+    "totalPages" : 1
+  },
+  "totalCount" : 1
+}

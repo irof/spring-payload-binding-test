@@ -1,0 +1,9 @@
+{
+  "totalLists" : 1,
+  "totalTasks" : 1,
+  "tasksByPriority" : {
+    "LOW" : 1
+  },
+  "completionRate" : 1,
+  "generatedAt" : "2024-01-01T00:00:00Z"
+}

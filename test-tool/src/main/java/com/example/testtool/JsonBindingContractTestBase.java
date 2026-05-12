@@ -48,9 +48,14 @@ public abstract class JsonBindingContractTestBase {
     private void run(JavaType type, Mode mode, SampleJsonFactory sampleFactory) throws Exception {
         JsonNode source = (mode == Mode.VERIFY) ? loadFromFile(type) : sampleFactory.build(type);
 
-        Object instance = objectMapper.readValue(objectMapper.writeValueAsString(source), type);
-        JsonNode roundtripped = objectMapper.readTree(objectMapper.writeValueAsString(instance));
-        assertEquals(source, roundtripped, () -> "JSON round-trip mismatch for " + type.toCanonical());
+        String sourceJson = objectMapper.writeValueAsString(source);
+        Object instance = objectMapper.readValue(sourceJson, type);
+        String roundtripJson = objectMapper.writeValueAsString(instance);
+
+        // Re-parse both sides so numeric node types (IntNode vs LongNode, etc.) are normalized.
+        JsonNode normalizedSource = objectMapper.readTree(sourceJson);
+        JsonNode roundtripped = objectMapper.readTree(roundtripJson);
+        assertEquals(normalizedSource, roundtripped, () -> "JSON round-trip mismatch for " + type.toCanonical());
 
         if (mode == Mode.WRITE) {
             writeToFile(type, source);

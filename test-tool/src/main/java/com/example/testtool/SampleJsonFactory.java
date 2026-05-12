@@ -54,7 +54,8 @@ public final class SampleJsonFactory {
         }
         if (type.isMapLikeType()) {
             ObjectNode obj = mapper.createObjectNode();
-            obj.set("key", build(type.getContentType(), path));
+            JsonNode keyNode = build(type.getKeyType(), path);
+            obj.set(keyNode.asText(), build(type.getContentType(), path));
             return obj;
         }
         if (raw.getName().startsWith("java.")) {
