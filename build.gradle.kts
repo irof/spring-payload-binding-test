@@ -16,5 +16,8 @@ subprojects {
 
 	tasks.withType<Test> {
 		useJUnitPlatform()
+		System.getProperty("json.binding.mode")?.let {
+			systemProperty("json.binding.mode", it)
+		}
 	}
 }

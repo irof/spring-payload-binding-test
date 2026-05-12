@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -16,25 +18,60 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SpringBootTest
 public abstract class JsonBindingContractTestBase {
 
+    public enum Mode { SAMPLE, WRITE, VERIFY }
+
     @Autowired
     ObjectMapper objectMapper;
 
     @Autowired
     RequestMappingHandlerMapping handlerMapping;
 
+    protected Mode mode() {
+        return Mode.valueOf(System.getProperty("json.binding.mode", Mode.SAMPLE.name()).toUpperCase());
+    }
+
+    protected Path jsonDirectory() {
+        return Path.of("src/test/resources/json-binding");
+    }
+
     @TestFactory
     List<DynamicTest> everyEndpointPayloadTypeIsJsonBindable() {
+        Mode mode = mode();
         SampleJsonFactory sampleFactory = new SampleJsonFactory(objectMapper);
         return EndpointPayloadTypes.collect(handlerMapping, objectMapper).stream()
-                .map(type -> DynamicTest.dynamicTest(type.toCanonical(), () -> verify(type, sampleFactory)))
+                .map(type -> DynamicTest.dynamicTest(
+                        "[" + mode + "] " + type.toCanonical(),
+                        () -> run(type, mode, sampleFactory)))
                 .toList();
     }
 
-    private void verify(JavaType type, SampleJsonFactory sampleFactory) throws Exception {
-        JsonNode sample = sampleFactory.build(type);
-        String json = objectMapper.writeValueAsString(sample);
-        Object instance = objectMapper.readValue(json, type);
+    private void run(JavaType type, Mode mode, SampleJsonFactory sampleFactory) throws Exception {
+        JsonNode source = (mode == Mode.VERIFY) ? loadFromFile(type) : sampleFactory.build(type);
+
+        Object instance = objectMapper.readValue(objectMapper.writeValueAsString(source), type);
         JsonNode roundtripped = objectMapper.readTree(objectMapper.writeValueAsString(instance));
-        assertEquals(sample, roundtripped, () -> "JSON round-trip mismatch for " + type.toCanonical());
+        assertEquals(source, roundtripped, () -> "JSON round-trip mismatch for " + type.toCanonical());
+
+        if (mode == Mode.WRITE) {
+            writeToFile(type, source);
+        }
+    }
+
+    private JsonNode loadFromFile(JavaType type) throws Exception {
+        Path file = fileFor(type);
+        if (!Files.exists(file)) {
+            throw new AssertionError("missing JSON fixture: " + file.toAbsolutePath());
+        }
+        return objectMapper.readTree(file.toFile());
+    }
+
+    private void writeToFile(JavaType type, JsonNode source) throws Exception {
+        Path file = fileFor(type);
+        Files.createDirectories(file.getParent());
+        objectMapper.writerWithDefaultPrettyPrinter().writeValue(file.toFile(), source);
+    }
+
+    private Path fileFor(JavaType type) {
+        return jsonDirectory().resolve(type.getRawClass().getName() + ".json");
     }
 }
