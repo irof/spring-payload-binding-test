@@ -11,7 +11,6 @@ import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import java.nio.file.Files;
@@ -21,7 +20,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@SpringBootTest
 public abstract class JsonBindingContractTestBase {
 
     public enum Mode { SAMPLE, WRITE, VERIFY }
