@@ -13,6 +13,7 @@ import org.junit.jupiter.api.TestFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import java.nio.file.Files;
@@ -32,6 +33,7 @@ public abstract class JsonBindingContractTestBase {
     ObjectMapper objectMapper;
 
     @Autowired
+    @Qualifier("requestMappingHandlerMapping")
     RequestMappingHandlerMapping handlerMapping;
 
     protected Mode defaultMode() {
