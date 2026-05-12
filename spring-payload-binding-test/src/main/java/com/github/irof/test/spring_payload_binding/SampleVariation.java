@@ -1,9 +1,12 @@
-package com.github.irof.test.spbt;
+package com.github.irof.test.spring_payload_binding;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+/**
+ * 全フィールドにサンプル値を埋めるバリエーションです。
+ */
 final class SampleVariation implements Variation {
 
     @Override

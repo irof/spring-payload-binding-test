@@ -1,8 +1,8 @@
-package com.github.irof.test.spbt;
+package com.github.irof.test.spring_payload_binding;
 
-import com.github.irof.test.spbt.EndpointPayloadTypes.PayloadType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.irof.test.spring_payload_binding.EndpointPayloadTypes.PayloadType;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.slf4j.Logger;
@@ -18,39 +18,66 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * JSONバインディングのコントラストテストの基底クラスです。
+ * エンドポイントのペイロード型を自動的に収集し、バリエーションごとのJSONバインディングテストを生成します。
+ */
 public abstract class JsonBindingContractTestBase {
 
     private static final Logger log = LoggerFactory.getLogger(JsonBindingContractTestBase.class);
 
+    /**
+     * JSONの読み書きに使用する ObjectMapper
+     */
     @Autowired
     ObjectMapper objectMapper;
 
+    /**
+     * ハンドラーメソッドの情報を取得するために使用する RequestMappingHandlerMapping
+     */
     @Autowired
     @Qualifier("requestMappingHandlerMapping")
     RequestMappingHandlerMapping handlerMapping;
 
+    /**
+     * JSONファイルを格納するディレクトリのパスを返します。
+     * デフォルトは "src/test/resources/json-binding" です。
+     *
+     * @return JSONディレクトリのパス
+     */
     protected Path jsonDirectory() {
         return Path.of("src/test/resources/json-binding");
     }
 
     /**
-     * ファイルが存在せず build した場合に、その JSON を fixture ファイルへ書き出すかどうか。
-     * デフォルトはシステムプロパティ {@code -Djson.binding.write=true} を見る。
-     * Subclass で常時 true を返せば CI で全 fixture を自動 pin するような運用も可能。
+     * ファイルが存在せず build した場合に、その JSON を fixture ファイルへ書き出すかどうかを返します。
+     * デフォルトはシステムプロパティ {@code -Djson.binding.write=true} を見ます。
+     * Subclass で常時 true を返せば CI で全 fixture を自動 pin するような運用も可能です。
+     *
+     * @return ファイルを書き出す場合は true
      */
     protected boolean writeMissingFiles() {
         return Boolean.getBoolean("json.binding.write");
     }
 
     /**
-     * 各ペイロードに対して実行するバリエーション群を返す。型ごとに自由に
-     * 組み替え可能 (NULL を受け付けない型はリストから外す、特定エンドポイントだけ
-     * カスタムバリエーションを追加する、等)。デフォルトは全ペイロードで SAMPLE と NULL。
+     * 各ペイロードに対して実行するバリエーション群を返します。
+     * 型ごとに自由に組み替え可能です (NULL を受け付けない型はリストから外す、特定エンドポイントだけ
+     * カスタムバリエーションを追加する、等)。
+     * デフォルトは全ペイロードで SAMPLE, NULL, EMPTY です。
+     *
+     * @param payload ペイロード型
+     * @return バリエーションのリスト
      */
     protected List<Variation> variations(PayloadType payload) {
         return List.of(Variation.SAMPLE, Variation.NULL, Variation.EMPTY);
     }
 
+    /**
+     * 全てのエンドポイントのペイロード型がJSONバインド可能であることを検証するテストファクトリです。
+     *
+     * @return 動的テストのリスト
+     */
     @TestFactory
     List<DynamicTest> everyEndpointPayloadTypeIsJsonBindable() {
         List<DynamicTest> tests = new ArrayList<>();

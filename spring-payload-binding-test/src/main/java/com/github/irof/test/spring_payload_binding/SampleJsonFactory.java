@@ -1,4 +1,4 @@
-package com.github.irof.test.spbt;
+package com.github.irof.test.spring_payload_binding;
 
 import com.fasterxml.jackson.databind.BeanDescription;
 import com.fasterxml.jackson.databind.JavaType;
@@ -6,36 +6,37 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.BooleanNode;
-import com.fasterxml.jackson.databind.node.DoubleNode;
-import com.fasterxml.jackson.databind.node.FloatNode;
-import com.fasterxml.jackson.databind.node.IntNode;
-import com.fasterxml.jackson.databind.node.LongNode;
-import com.fasterxml.jackson.databind.node.NullNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.ShortNode;
-import com.fasterxml.jackson.databind.node.TextNode;
+import com.fasterxml.jackson.databind.node.*;
 
 import java.net.URI;
 import java.net.URL;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+/**
+ * Javaの型情報に基づいてサンプル値を持つ JsonNode を構築するファクトリクラスです。
+ */
 public final class SampleJsonFactory {
 
     private final ObjectMapper mapper;
 
+    /**
+     * コンストラクタ。
+     *
+     * @param mapper 使用する ObjectMapper
+     */
     public SampleJsonFactory(ObjectMapper mapper) {
         this.mapper = mapper;
     }
 
+    /**
+     * 指定された型に対するサンプル JSON を構築します。
+     *
+     * @param type 構築する型
+     * @return サンプル値を持つ JsonNode
+     */
     public JsonNode build(JavaType type) {
         return build(type, new HashSet<>());
     }

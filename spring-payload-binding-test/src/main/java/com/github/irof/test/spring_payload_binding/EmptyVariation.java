@@ -1,4 +1,4 @@
-package com.github.irof.test.spbt;
+package com.github.irof.test.spring_payload_binding;
 
 import com.fasterxml.jackson.databind.BeanDescription;
 import com.fasterxml.jackson.databind.JavaType;
@@ -6,18 +6,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
-import com.fasterxml.jackson.databind.node.BooleanNode;
-import com.fasterxml.jackson.databind.node.IntNode;
-import com.fasterxml.jackson.databind.node.NullNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.TextNode;
+import com.fasterxml.jackson.databind.node.*;
 
 import java.util.HashSet;
 import java.util.Set;
 
 /**
- * 空/ゼロ値を埋めるバリエーション。String→"", コレクション→[], primitive→デフォルト値 (0/false)、
- * ネスト object は再帰的に空フィールドを持つ object、@JsonValue 型は値型を辿った先の empty。
+ * 空/ゼロ値を埋めるバリエーションです。
+ * String→"", コレクション→[], primitive→デフォルト値 (0/false)、
+ * ネスト object は再帰的に空フィールドを持つ object、@JsonValue 型は値型を辿った先の empty を生成します。
  */
 final class EmptyVariation implements Variation {
 

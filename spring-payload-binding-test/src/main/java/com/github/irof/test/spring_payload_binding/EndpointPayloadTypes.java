@@ -1,4 +1,4 @@
-package com.github.irof.test.spbt;
+package com.github.irof.test.spring_payload_binding;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,20 +10,31 @@ import org.springframework.web.servlet.mvc.condition.RequestMethodsRequestCondit
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
+/**
+ * エンドポイントで使用されているペイロード型を収集するユーティリティクラスです。
+ */
 public final class EndpointPayloadTypes {
 
-    public record PayloadType(JavaType type, List<String> endpoints) {}
+    /**
+     * ペイロード型と、それを使用しているエンドポイントの情報のペアです。
+     *
+     * @param type      ペイロードの型
+     * @param endpoints この型を使用しているエンドポイントのリスト
+     */
+    public record PayloadType(JavaType type, List<String> endpoints) {
+    }
 
-    private EndpointPayloadTypes() {}
+    private EndpointPayloadTypes() {
+    }
 
+    /**
+     * 指定されたクラスがフレームワーク提供の型かどうかを判定します。
+     *
+     * @param raw 判定対象のクラス
+     * @return フレームワーク提供の型であれば true
+     */
     static boolean isFrameworkType(Class<?> raw) {
         String name = raw.getName();
         return name.startsWith("java.")
@@ -32,6 +43,13 @@ public final class EndpointPayloadTypes {
                 || name.startsWith("org.springframework.");
     }
 
+    /**
+     * RequestMappingHandlerMapping からエンドポイントのペイロード型を収集します。
+     *
+     * @param handlerMapping HandlerMapping
+     * @param objectMapper   ObjectMapper
+     * @return 収集された PayloadType のセット
+     */
     public static Set<PayloadType> collect(RequestMappingHandlerMapping handlerMapping, ObjectMapper objectMapper) {
         Map<JavaType, List<String>> accum = new LinkedHashMap<>();
         handlerMapping.getHandlerMethods().forEach((info, handler) -> {
