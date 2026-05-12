@@ -10,6 +10,8 @@ import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
@@ -21,6 +23,8 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public abstract class JsonBindingContractTestBase {
+
+    private static final Logger log = LoggerFactory.getLogger(JsonBindingContractTestBase.class);
 
     public enum Mode { SAMPLE, WRITE, VERIFY }
 
@@ -57,6 +61,8 @@ public abstract class JsonBindingContractTestBase {
     private void run(PayloadType payload, Mode mode, SampleJsonFactory sampleFactory) throws Exception {
         JsonNode source = (mode == Mode.VERIFY) ? loadFromFile(payload) : sampleFactory.build(payload.type());
         String sourceJson = objectMapper.writeValueAsString(source);
+
+        log.info("[{}][{}] {}\n{}", mode, payload.direction(), payload.type().toCanonical(), source.toPrettyString());
 
         if (payload.direction() == Direction.REQUEST) {
             Object instance = objectMapper.readValue(sourceJson, payload.type());
