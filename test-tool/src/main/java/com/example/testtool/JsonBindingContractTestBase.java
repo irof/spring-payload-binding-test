@@ -110,7 +110,7 @@ public abstract class JsonBindingContractTestBase {
         Class<?> raw = type.getRawClass();
         if (raw.isPrimitive() || raw.isEnum() || raw.getName().startsWith("java.")) return;
 
-        BeanDescription desc = objectMapper.getDeserializationConfig().introspect(type);
+        BeanDescription desc = objectMapper.getSerializationConfig().introspect(type);
         for (BeanPropertyDefinition prop : desc.findProperties()) {
             JsonNode expectedValue = expected.get(prop.getName());
             if (expectedValue == null || expectedValue.isNull()) continue;
