@@ -1,4 +1,4 @@
-package com.example.demo.testtool;
+package com.example.testtool;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,7 +11,7 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import java.util.List;
 
 @SpringBootTest
-class JsonBindingContractTest {
+public abstract class JsonBindingContractTestBase {
 
     @Autowired
     ObjectMapper objectMapper;

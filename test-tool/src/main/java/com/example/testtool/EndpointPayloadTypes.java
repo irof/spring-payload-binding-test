@@ -1,4 +1,4 @@
-package com.example.demo.testtool;
+package com.example.testtool;
 
 import com.fasterxml.jackson.databind.BeanDescription;
 import com.fasterxml.jackson.databind.JavaType;
