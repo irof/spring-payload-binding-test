@@ -6,8 +6,8 @@ Spring Boot の TODO サンプルアプリ (`todo-app`) と、エンドポイン
 
 | モジュール | 役割 |
 |---|---|
+| `spring-payload-binding-test` | `@RestController` の `@RequestBody` 引数と戻り値を自動収集して JSON バインディングを検査する汎用ツール。`com.github.irof:spring-payload-binding-test` として publish |
 | `todo-app` | Spring Boot Web アプリ。`TodoList` / 検索 / 統計 / コメントの 3 系統エンドポイントを提供 |
-| `test-tool` | `@RestController` の `@RequestBody` 引数と戻り値を自動収集して JSON バインディングを検査する汎用ツール。`com.github.irof:spring-payload-binding-test` として publish |
 
 ## test-tool の使い方
 
