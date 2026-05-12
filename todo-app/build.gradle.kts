@@ -6,6 +6,6 @@ plugins {
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
-	testImplementation(project(":test-tool"))
+	testImplementation(project(":spring-payload-binding-test"))
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }

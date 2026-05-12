@@ -1,3 +1,4 @@
 rootProject.name = "demo"
 
-include("todo-app", "test-tool")
+include("spring-payload-binding-test")
+include("todo-app")
