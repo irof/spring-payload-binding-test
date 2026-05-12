@@ -129,7 +129,7 @@ public abstract class JsonBindingContractTestBase {
             return;
         }
         Class<?> raw = type.getRawClass();
-        if (raw.isPrimitive() || raw.isEnum() || raw.getName().startsWith("java.")) return;
+        if (raw.isPrimitive() || raw.isEnum() || EndpointPayloadTypes.isFrameworkType(raw)) return;
 
         BeanDescription desc = objectMapper.getSerializationConfig().introspect(type);
         AnnotatedMember jsonValue = desc.findJsonValueAccessor();

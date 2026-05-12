@@ -59,7 +59,7 @@ public final class SampleJsonFactory {
             obj.set(keyNode.asText(), build(type.getContentType(), path));
             return obj;
         }
-        if (raw.getName().startsWith("java.")) {
+        if (EndpointPayloadTypes.isFrameworkType(raw)) {
             return NullNode.instance;
         }
         if (!path.add(type)) {

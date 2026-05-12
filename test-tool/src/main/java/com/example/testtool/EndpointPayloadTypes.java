@@ -28,6 +28,14 @@ public final class EndpointPayloadTypes {
 
     private EndpointPayloadTypes() {}
 
+    static boolean isFrameworkType(Class<?> raw) {
+        String name = raw.getName();
+        return name.startsWith("java.")
+                || name.startsWith("jakarta.")
+                || name.startsWith("javax.")
+                || name.startsWith("org.springframework.");
+    }
+
     public static Set<PayloadType> collect(RequestMappingHandlerMapping handlerMapping, ObjectMapper objectMapper) {
         Map<TypeKey, List<String>> accum = new LinkedHashMap<>();
         handlerMapping.getHandlerMethods().forEach((info, handler) -> {
@@ -74,7 +82,7 @@ public final class EndpointPayloadTypes {
             return;
         }
         if (isScalar(raw)) return;
-        if (raw.getName().startsWith("java.")) return;
+        if (isFrameworkType(raw)) return;
 
         accum.computeIfAbsent(new TypeKey(type, direction), k -> new ArrayList<>()).add(endpoint);
     }
