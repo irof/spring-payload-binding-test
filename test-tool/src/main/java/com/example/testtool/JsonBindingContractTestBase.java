@@ -30,8 +30,13 @@ public abstract class JsonBindingContractTestBase {
     @Autowired
     RequestMappingHandlerMapping handlerMapping;
 
-    protected Mode mode() {
-        return Mode.valueOf(System.getProperty("json.binding.mode", Mode.SAMPLE.name()).toUpperCase());
+    protected Mode defaultMode() {
+        return Mode.SAMPLE;
+    }
+
+    protected final Mode mode() {
+        String override = System.getProperty("json.binding.mode");
+        return override != null ? Mode.valueOf(override.toUpperCase()) : defaultMode();
     }
 
     protected Path jsonDirectory() {
