@@ -21,4 +21,7 @@ public interface Variation {
 
     /** 全フィールド null (`@JsonValue` 型は top-level null) のビルトインバリエーション。 */
     Variation NULL = new NullVariation();
+
+    /** 空/ゼロ値 (String→"", コレクション→[], primitive→デフォルト値) のビルトインバリエーション。 */
+    Variation EMPTY = new EmptyVariation();
 }

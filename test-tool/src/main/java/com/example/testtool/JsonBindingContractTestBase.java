@@ -48,7 +48,7 @@ public abstract class JsonBindingContractTestBase {
      * カスタムバリエーションを追加する、等)。デフォルトは全ペイロードで SAMPLE と NULL。
      */
     protected List<Variation> variations(PayloadType payload) {
-        return List.of(Variation.SAMPLE, Variation.NULL);
+        return List.of(Variation.SAMPLE, Variation.NULL, Variation.EMPTY);
     }
 
     @TestFactory

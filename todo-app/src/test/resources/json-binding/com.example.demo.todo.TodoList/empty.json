@@ -1,0 +1,12 @@
+{
+  "id" : "",
+  "title" : "",
+  "owner" : {
+    "name" : "",
+    "contact" : {
+      "email" : "",
+      "phone" : ""
+    }
+  },
+  "tasks" : [ ]
+}
