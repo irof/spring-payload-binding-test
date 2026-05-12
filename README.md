@@ -111,35 +111,16 @@ class JsonBindingContractTest extends JsonBindingContractTestBase {
 }
 ```
 
-## 3 つの実行モード
+## fixture ファイルの扱い
 
-| モード | 動作 |
-|---|---|
-| `SAMPLE` (default) | サンプル値を埋めた JSON を生成しメモリ上で検査 |
-| `WRITE` | サンプル JSON を `src/test/resources/json-binding/{FQN}/{variation}.json` に書き出し（型毎のディレクトリにバリエーション別ファイル） |
-| `VERIFY` | 上記ファイルを読み込み、内容との突き合わせで検査。fixture が無ければ失敗 |
+各 (型, バリエーション) について、`src/test/resources/json-binding/{FQN}/{variation}.json` の有無で動作が自動切替される。
 
-### モードの指定
+- **ファイルあり**: そのファイルの JSON を source として読み込みラウンドトリップ検査
+- **ファイルなし**: `Variation.build()` でその場生成してラウンドトリップ検査
 
-優先順位: システムプロパティ > サブクラスの `defaultMode()` > `SAMPLE`
+モード指定は不要。fixture を pin したい型・バリエーションだけファイル化すればよい。Pin されていないものは毎回 build される。
 
-```
-# システムプロパティで一時上書き
-./gradlew test -Djson.binding.mode=WRITE
-```
-
-```java
-// サブクラスでハードコード既定値
-@SpringBootTest
-class JsonBindingContractTest extends JsonBindingContractTestBase {
-    @Override
-    protected Mode defaultMode() {
-        return Mode.VERIFY;
-    }
-}
-```
-
-典型的なワークフロー: **VERIFY を既定にして CI で常時検査、fixture 更新時のみ `-Djson.binding.mode=WRITE` で上書き再生成**。
+fixture を新規作成・更新したい時は実行ログに pretty-print 出力された JSON を該当パスに保存する。ファイルを削除すれば次回から build に戻る。
 
 ## サンプル値の生成
 
@@ -153,10 +134,10 @@ class JsonBindingContractTest extends JsonBindingContractTestBase {
 
 ## 実行時ログ
 
-各テストで使用された JSON が INFO ログに pretty-print 出力される。SAMPLE モードでも実際の検査対象を目視確認できる。
+各テストで使用された JSON が INFO ログに pretty-print 出力される (build か file かの出自も併記)。
 
 ```
-[SAMPLE][sample] com.example.demo.todo.TodoList
+[sample] com.example.demo.todo.TodoList (built)
 {
   "id" : "sample",
   "title" : "sample",

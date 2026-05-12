@@ -13,11 +13,6 @@ import java.util.List;
 class JsonBindingContractTest extends JsonBindingContractTestBase {
 
     @Override
-    protected Mode defaultMode() {
-        return Mode.VERIFY;
-    }
-
-    @Override
     protected List<Variation> variations(PayloadType payload) {
         // primitive を含む型は NULL variation で round-trip できない
         // ({"x": null} → x=0 → serialize → {"x": 0} となり source と差が出る)

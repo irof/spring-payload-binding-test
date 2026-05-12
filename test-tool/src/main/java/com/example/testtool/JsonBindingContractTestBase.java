@@ -22,23 +22,12 @@ public abstract class JsonBindingContractTestBase {
 
     private static final Logger log = LoggerFactory.getLogger(JsonBindingContractTestBase.class);
 
-    public enum Mode { SAMPLE, WRITE, VERIFY }
-
     @Autowired
     ObjectMapper objectMapper;
 
     @Autowired
     @Qualifier("requestMappingHandlerMapping")
     RequestMappingHandlerMapping handlerMapping;
-
-    protected Mode defaultMode() {
-        return Mode.SAMPLE;
-    }
-
-    protected final Mode mode() {
-        String override = System.getProperty("json.binding.mode");
-        return override != null ? Mode.valueOf(override.toUpperCase()) : defaultMode();
-    }
 
     protected Path jsonDirectory() {
         return Path.of("src/test/resources/json-binding");
@@ -55,21 +44,20 @@ public abstract class JsonBindingContractTestBase {
 
     @TestFactory
     List<DynamicTest> everyEndpointPayloadTypeIsJsonBindable() {
-        Mode mode = mode();
         List<DynamicTest> tests = new ArrayList<>();
         for (PayloadType payload : EndpointPayloadTypes.collect(handlerMapping, objectMapper)) {
             for (Variation variation : variations(payload)) {
                 tests.add(DynamicTest.dynamicTest(
-                        "[" + mode + "][" + variation.name() + "] " + payload.type().toCanonical(),
-                        () -> run(payload, variation, mode)));
+                        "[" + variation.name() + "] " + payload.type().toCanonical(),
+                        () -> run(payload, variation)));
             }
         }
         return tests;
     }
 
-    private void run(PayloadType payload, Variation variation, Mode mode) throws Exception {
+    private void run(PayloadType payload, Variation variation) throws Exception {
         try {
-            runChecked(payload, variation, mode);
+            runChecked(payload, variation);
         } catch (Throwable t) {
             String message = payload.type().toCanonical() + " [" + variation.name() + "] used by:\n  "
                     + String.join("\n  ", payload.endpoints()) + "\n"
@@ -78,35 +66,26 @@ public abstract class JsonBindingContractTestBase {
         }
     }
 
-    private void runChecked(PayloadType payload, Variation variation, Mode mode) throws Exception {
-        JsonNode source = (mode == Mode.VERIFY) ? loadFromFile(payload, variation) : variation.build(payload.type(), objectMapper);
+    private void runChecked(PayloadType payload, Variation variation) throws Exception {
+        Path file = fileFor(payload, variation);
+        JsonNode source;
+        String origin;
+        if (Files.exists(file)) {
+            source = objectMapper.readTree(file.toFile());
+            origin = "file " + file;
+        } else {
+            source = variation.build(payload.type(), objectMapper);
+            origin = "built";
+        }
         String sourceJson = objectMapper.writeValueAsString(source);
 
-        log.info("[{}][{}] {}\n{}", mode, variation.name(), payload.type().toCanonical(), source.toPrettyString());
+        log.info("[{}] {} ({})\n{}", variation.name(), payload.type().toCanonical(), origin, source.toPrettyString());
 
         Object instance = objectMapper.readValue(sourceJson, payload.type());
         String serialized = objectMapper.writeValueAsString(instance);
         JsonNode normalizedSource = objectMapper.readTree(sourceJson);
         JsonNode actual = objectMapper.readTree(serialized);
         assertEquals(normalizedSource, actual, "round-trip JSON differs from source");
-
-        if (mode == Mode.WRITE) {
-            writeToFile(payload, variation, source);
-        }
-    }
-
-    private JsonNode loadFromFile(PayloadType payload, Variation variation) throws Exception {
-        Path file = fileFor(payload, variation);
-        if (!Files.exists(file)) {
-            throw new AssertionError("missing JSON fixture: " + file.toAbsolutePath());
-        }
-        return objectMapper.readTree(file.toFile());
-    }
-
-    private void writeToFile(PayloadType payload, Variation variation, JsonNode source) throws Exception {
-        Path file = fileFor(payload, variation);
-        Files.createDirectories(file.getParent());
-        objectMapper.writerWithDefaultPrettyPrinter().writeValue(file.toFile(), source);
     }
 
     private Path fileFor(PayloadType payload, Variation variation) {
