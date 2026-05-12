@@ -1,6 +1,6 @@
-package com.example.testtool;
+package com.github.irof.test.spbt;
 
-import com.example.testtool.EndpointPayloadTypes.PayloadType;
+import com.github.irof.test.spbt.EndpointPayloadTypes.PayloadType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DynamicTest;

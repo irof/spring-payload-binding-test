@@ -1,4 +1,4 @@
-package com.example.testtool;
+package com.github.irof.test.spbt;
 
 import com.fasterxml.jackson.databind.BeanDescription;
 import com.fasterxml.jackson.databind.JavaType;

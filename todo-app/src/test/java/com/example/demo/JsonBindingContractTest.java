@@ -2,9 +2,9 @@ package com.example.demo;
 
 import com.example.demo.todo.SearchResult;
 import com.example.demo.todo.TodoStats;
-import com.example.testtool.EndpointPayloadTypes.PayloadType;
-import com.example.testtool.JsonBindingContractTestBase;
-import com.example.testtool.Variation;
+import com.github.irof.test.spbt.EndpointPayloadTypes.PayloadType;
+import com.github.irof.test.spbt.JsonBindingContractTestBase;
+import com.github.irof.test.spbt.Variation;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
