@@ -21,6 +21,8 @@ Spring Boot の TODO サンプルアプリ (`todo-app`) と、エンドポイン
 
 ### 2. 利用側の依存追加
 
+Gradle (`build.gradle.kts`):
+
 ```kotlin
 repositories {
     mavenLocal()
@@ -31,6 +33,21 @@ dependencies {
     testImplementation("com.github.irof:json-binding-contract-test:0.0.1-SNAPSHOT")
 }
 ```
+
+Maven (`pom.xml`):
+
+```xml
+<dependencies>
+    <dependency>
+        <groupId>com.github.irof</groupId>
+        <artifactId>json-binding-contract-test</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+        <scope>test</scope>
+    </dependency>
+</dependencies>
+```
+
+Maven は `~/.m2/repository` を既定で検索するため mavenLocal の宣言は不要。
 
 ### 3. テストクラスを作成
 
