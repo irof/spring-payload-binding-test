@@ -50,23 +50,21 @@ public abstract class JsonBindingContractTestBase {
         return Path.of("src/test/resources/json-binding");
     }
 
-    protected List<Variation> variations() {
+    /**
+     * 各ペイロードに対して実行するバリエーション群を返す。型・方向ごとに自由に
+     * 組み替え可能 (NULL を受け付けない型はリストから外す、特定エンドポイントだけ
+     * カスタムバリエーションを追加する、等)。デフォルトは全ペイロードで SAMPLE と NULL。
+     */
+    protected List<Variation> variations(PayloadType payload) {
         return List.of(Variation.SAMPLE, Variation.NULL);
-    }
-
-    /** Subclasses can opt out specific payload/variation combinations (e.g., types that reject null). */
-    protected boolean shouldRun(PayloadType payload, Variation variation) {
-        return true;
     }
 
     @TestFactory
     List<DynamicTest> everyEndpointPayloadTypeIsJsonBindable() {
         Mode mode = mode();
-        List<Variation> variations = variations();
         List<DynamicTest> tests = new ArrayList<>();
         for (PayloadType payload : EndpointPayloadTypes.collect(handlerMapping, objectMapper)) {
-            for (Variation variation : variations) {
-                if (!shouldRun(payload, variation)) continue;
+            for (Variation variation : variations(payload)) {
                 tests.add(DynamicTest.dynamicTest(
                         "[" + mode + "][" + payload.direction() + "][" + variation.name() + "] " + payload.type().toCanonical(),
                         () -> run(payload, variation, mode)));

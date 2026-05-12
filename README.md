@@ -89,26 +89,25 @@ class MinimumValuesVariation implements Variation {
         // ... カスタムロジック
     }
 }
-
-@Override
-protected List<Variation> variations() {
-    return List.of(Variation.SAMPLE, Variation.NULL, new MinimumValuesVariation());
-}
 ```
 
-`null` を許容しない型（コンストラクタで非 null チェックがある、primitive フィールドを持ち response の round-trip が成立しない、等）は subclass で `shouldRun(payload, variation)` を override して opt-out できる。
+**型ごとのバリエーション指定**: `variations(PayloadType)` を override し、各ペイロードに対して実行するバリエーション群を返す。型・方向に応じて自由に組み替え可能 (NULL を受け付けない型はリストから外す、特定型だけカスタムバリエーションを追加する、等)。
 
 ```java
 @SpringBootTest
 class JsonBindingContractTest extends JsonBindingContractTestBase {
     @Override
-    protected boolean shouldRun(PayloadType payload, Variation variation) {
-        // primitive を含む型は NULL response で round-trip 不可
-        if (variation == Variation.NULL && payload.direction() == Direction.RESPONSE) {
-            Class<?> raw = payload.type().getRawClass();
-            if (raw == SearchResult.class || raw == TodoStats.class) return false;
+    protected List<Variation> variations(PayloadType payload) {
+        Class<?> raw = payload.type().getRawClass();
+        // primitive を含む型は NULL response で round-trip 不可なので除外
+        if (payload.direction() == Direction.RESPONSE && (raw == SearchResult.class || raw == TodoStats.class)) {
+            return List.of(Variation.SAMPLE);
         }
-        return true;
+        // 特定の型だけカスタムバリエーションを足すこともできる
+        if (raw == TodoList.class) {
+            return List.of(Variation.SAMPLE, Variation.NULL, new MinimumValuesVariation());
+        }
+        return super.variations(payload);
     }
 }
 ```

@@ -8,6 +8,8 @@ import com.example.testtool.JsonBindingContractTestBase;
 import com.example.testtool.Variation;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.util.List;
+
 @SpringBootTest
 class JsonBindingContractTest extends JsonBindingContractTestBase {
 
@@ -17,13 +19,13 @@ class JsonBindingContractTest extends JsonBindingContractTestBase {
     }
 
     @Override
-    protected boolean shouldRun(PayloadType payload, Variation variation) {
+    protected List<Variation> variations(PayloadType payload) {
         // primitive を含む型は NULL response variation で round-trip できない
         // ({"x": null} → x=0 → serialize → {"x": 0} となり source と差が出る)
-        if (variation == Variation.NULL && payload.direction() == Direction.RESPONSE) {
-            Class<?> raw = payload.type().getRawClass();
-            if (raw == SearchResult.class || raw == TodoStats.class) return false;
+        Class<?> raw = payload.type().getRawClass();
+        if (payload.direction() == Direction.RESPONSE && (raw == SearchResult.class || raw == TodoStats.class)) {
+            return List.of(Variation.SAMPLE);
         }
-        return true;
+        return super.variations(payload);
     }
 }
