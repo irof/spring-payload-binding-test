@@ -1,0 +1,9 @@
+{
+  "id" : "sample",
+  "body" : "sample",
+  "author" : {
+    "name" : "sample",
+    "email" : "sample"
+  },
+  "postedAt" : "2024-01-01T00:00:00"
+}

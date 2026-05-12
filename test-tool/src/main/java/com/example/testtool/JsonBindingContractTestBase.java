@@ -1,6 +1,7 @@
 package com.example.testtool;
 
-import com.fasterxml.jackson.databind.JavaType;
+import com.example.testtool.EndpointPayloadTypes.Direction;
+import com.example.testtool.EndpointPayloadTypes.PayloadType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DynamicTest;
@@ -39,44 +40,49 @@ public abstract class JsonBindingContractTestBase {
         Mode mode = mode();
         SampleJsonFactory sampleFactory = new SampleJsonFactory(objectMapper);
         return EndpointPayloadTypes.collect(handlerMapping, objectMapper).stream()
-                .map(type -> DynamicTest.dynamicTest(
-                        "[" + mode + "] " + type.toCanonical(),
-                        () -> run(type, mode, sampleFactory)))
+                .map(payload -> DynamicTest.dynamicTest(
+                        "[" + mode + "][" + payload.direction() + "] " + payload.type().toCanonical(),
+                        () -> run(payload, mode, sampleFactory)))
                 .toList();
     }
 
-    private void run(JavaType type, Mode mode, SampleJsonFactory sampleFactory) throws Exception {
-        JsonNode source = (mode == Mode.VERIFY) ? loadFromFile(type) : sampleFactory.build(type);
-
+    private void run(PayloadType payload, Mode mode, SampleJsonFactory sampleFactory) throws Exception {
+        JsonNode source = (mode == Mode.VERIFY) ? loadFromFile(payload) : sampleFactory.build(payload.type());
         String sourceJson = objectMapper.writeValueAsString(source);
-        Object instance = objectMapper.readValue(sourceJson, type);
-        String roundtripJson = objectMapper.writeValueAsString(instance);
 
-        // Re-parse both sides so numeric node types (IntNode vs LongNode, etc.) are normalized.
-        JsonNode normalizedSource = objectMapper.readTree(sourceJson);
-        JsonNode roundtripped = objectMapper.readTree(roundtripJson);
-        assertEquals(normalizedSource, roundtripped, () -> "JSON round-trip mismatch for " + type.toCanonical());
+        if (payload.direction() == Direction.REQUEST) {
+            objectMapper.readValue(sourceJson, payload.type());
+        } else {
+            Object instance = objectMapper.readValue(sourceJson, payload.type());
+            String serialized = objectMapper.writeValueAsString(instance);
+            JsonNode normalizedSource = objectMapper.readTree(sourceJson);
+            JsonNode actual = objectMapper.readTree(serialized);
+            assertEquals(normalizedSource, actual,
+                    () -> "serialized JSON differs from source for " + payload.type().toCanonical());
+        }
 
         if (mode == Mode.WRITE) {
-            writeToFile(type, source);
+            writeToFile(payload, source);
         }
     }
 
-    private JsonNode loadFromFile(JavaType type) throws Exception {
-        Path file = fileFor(type);
+    private JsonNode loadFromFile(PayloadType payload) throws Exception {
+        Path file = fileFor(payload);
         if (!Files.exists(file)) {
             throw new AssertionError("missing JSON fixture: " + file.toAbsolutePath());
         }
         return objectMapper.readTree(file.toFile());
     }
 
-    private void writeToFile(JavaType type, JsonNode source) throws Exception {
-        Path file = fileFor(type);
+    private void writeToFile(PayloadType payload, JsonNode source) throws Exception {
+        Path file = fileFor(payload);
         Files.createDirectories(file.getParent());
         objectMapper.writerWithDefaultPrettyPrinter().writeValue(file.toFile(), source);
     }
 
-    private Path fileFor(JavaType type) {
-        return jsonDirectory().resolve(type.getRawClass().getName() + ".json");
+    private Path fileFor(PayloadType payload) {
+        return jsonDirectory()
+                .resolve(payload.direction().name().toLowerCase())
+                .resolve(payload.type().getRawClass().getName() + ".json");
     }
 }
