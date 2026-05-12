@@ -7,7 +7,7 @@ Spring Boot の TODO サンプルアプリ (`todo-app`) と、エンドポイン
 | モジュール | 役割 |
 |---|---|
 | `todo-app` | Spring Boot Web アプリ。`TodoList` / 検索 / 統計 / コメントの 3 系統エンドポイントを提供 |
-| `test-tool` | `@RestController` の `@RequestBody` 引数と戻り値を自動収集して JSON バインディングを検査する汎用ツール。`com.github.irof:json-binding-contract-test` として publish |
+| `test-tool` | `@RestController` の `@RequestBody` 引数と戻り値を自動収集して JSON バインディングを検査する汎用ツール。`com.github.irof:spring-payload-binding-test` として publish |
 
 ## test-tool の使い方
 
@@ -17,7 +17,7 @@ Spring Boot の TODO サンプルアプリ (`todo-app`) と、エンドポイン
 ./gradlew :test-tool:publishToMavenLocal
 ```
 
-`~/.m2/repository/com/github/irof/json-binding-contract-test/0.0.1-SNAPSHOT/` に jar / sources / javadoc / pom が生成される。
+`~/.m2/repository/com/github/irof/spring-payload-binding-test/0.0.1-SNAPSHOT/` に jar / sources / javadoc / pom が生成される。
 
 ### 2. 利用側の依存追加
 
@@ -30,7 +30,7 @@ repositories {
 }
 
 dependencies {
-    testImplementation("com.github.irof:json-binding-contract-test:0.0.1-SNAPSHOT")
+    testImplementation("com.github.irof:spring-payload-binding-test:0.0.1-SNAPSHOT")
 }
 ```
 
@@ -40,7 +40,7 @@ Maven (`pom.xml`):
 <dependencies>
     <dependency>
         <groupId>com.github.irof</groupId>
-        <artifactId>json-binding-contract-test</artifactId>
+        <artifactId>spring-payload-binding-test</artifactId>
         <version>0.0.1-SNAPSHOT</version>
         <scope>test</scope>
     </dependency>
@@ -70,7 +70,7 @@ class JsonBindingContractTest extends JsonBindingContractTestBase {
 
 ## 値のバリエーション
 
-各 `(type, direction)` の組に対して、複数のバリエーションが**並行で**実行される（モード切り替えではなく一つのテスト実行で両方検査）。
+各ペイロード型に対して複数のバリエーションが**並行で**実行される（一つのテスト実行で全バリエーションを検査）。
 
 **ビルトインバリエーション:**
 
@@ -164,13 +164,13 @@ rm -r src/test/resources/json-binding && ./gradlew test -Djson.binding.write=tru
 
 ## 利用例（todo-app）
 
-`todo-app` 自身が test-tool の利用例になっている。`JsonBindingContractTest` は `defaultMode() = VERIFY` 固定で、コミット済み fixture (`todo-app/src/test/resources/json-binding/`) と毎回突き合わせる構成。
+`todo-app` 自身が test-tool の利用例になっている。コミット済み fixture (`todo-app/src/test/resources/json-binding/`) があれば自動でそちらと突き合わせ、無いバリエーションは build してラウンドトリップ検査される。
 
 ```
 ./gradlew :todo-app:test
 ```
 
-6 つの型 × バリエーション (SAMPLE / NULL のうち適用される分) で複数の動的テストが実行される。
+6 つの型 × バリエーション (SAMPLE / NULL / EMPTY のうち適用される分) で複数の動的テストが実行される。
 
 ## Maven Central 公開予定
 
