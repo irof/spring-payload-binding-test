@@ -171,11 +171,3 @@ rm -r src/test/resources/json-binding && ./gradlew test -Djson.binding.write=tru
 ```
 
 6 つの型 × バリエーション (SAMPLE / NULL / EMPTY のうち適用される分) で複数の動的テストが実行される。
-
-## Maven Central 公開予定
-
-現在は mavenLocal でのみ利用可能。Central 公開時の TODO:
-
-- `test-tool/build.gradle.kts` 内 `TODO:` コメント箇所 (url, developer, scm) を実値に
-- `signing` プラグインを追加し GPG 署名 (Central の必須要件)
-- 必要なら `io.github.gradle-nexus.publish-plugin` でステージング自動化
