@@ -18,7 +18,7 @@ class JsonBindingContractTest extends JsonBindingContractTestBase {
         // ({"x": null} → x=0 → serialize → {"x": 0} となり source と差が出る)
         Class<?> raw = payload.type().getRawClass();
         if (raw == SearchResult.class || raw == TodoStats.class) {
-            return List.of(Variation.SAMPLE);
+            return List.of(Variation.SAMPLE, Variation.EMPTY);
         }
         return super.variations(payload);
     }
