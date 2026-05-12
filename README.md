@@ -120,7 +120,17 @@ class JsonBindingContractTest extends JsonBindingContractTestBase {
 
 モード指定は不要。fixture を pin したい型・バリエーションだけファイル化すればよい。Pin されていないものは毎回 build される。
 
-fixture を新規作成・更新したい時は実行ログに pretty-print 出力された JSON を該当パスに保存する。ファイルを削除すれば次回から build に戻る。
+fixture を新規作成・更新したい時は `-Djson.binding.write=true` で実行すると、ファイルが無くて build したケースのみ JSON が該当パスに書き出される（既存ファイルは上書きされない）。fixture を再生成したい場合はファイルを削除してから write 実行する。
+
+```
+# 不足分の fixture を生成
+./gradlew test -Djson.binding.write=true
+
+# 全 fixture を再生成
+rm -r src/test/resources/json-binding && ./gradlew test -Djson.binding.write=true
+```
+
+サブクラスで `writeMissingFiles()` を override すれば常時 write も可能。
 
 ## サンプル値の生成
 

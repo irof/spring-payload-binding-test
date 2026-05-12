@@ -16,5 +16,8 @@ subprojects {
 
 	tasks.withType<Test> {
 		useJUnitPlatform()
+		System.getProperty("json.binding.write")?.let {
+			systemProperty("json.binding.write", it)
+		}
 	}
 }
