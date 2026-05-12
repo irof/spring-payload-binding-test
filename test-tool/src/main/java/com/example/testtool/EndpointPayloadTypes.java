@@ -1,9 +1,7 @@
 package com.example.testtool;
 
-import com.fasterxml.jackson.databind.BeanDescription;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpEntity;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,59 +17,40 @@ public final class EndpointPayloadTypes {
     private EndpointPayloadTypes() {}
 
     public static Set<JavaType> collect(RequestMappingHandlerMapping handlerMapping, ObjectMapper objectMapper) {
-        Set<JavaType> roots = new LinkedHashSet<>();
+        Set<JavaType> result = new LinkedHashSet<>();
         handlerMapping.getHandlerMethods().forEach((info, handler) -> {
             if (isFrameworkHandler(handler)) return;
-            collectRequestBodies(handler, objectMapper, roots);
-            collectResponseBody(handler, objectMapper, roots);
+            for (MethodParameter p : handler.getMethodParameters()) {
+                if (p.hasParameterAnnotation(RequestBody.class)) {
+                    addUnwrapped(objectMapper.constructType(p.getGenericParameterType()), result);
+                }
+            }
+            addUnwrapped(objectMapper.constructType(handler.getMethod().getGenericReturnType()), result);
         });
-        Set<JavaType> all = new LinkedHashSet<>();
-        for (JavaType root : roots) {
-            walk(root, objectMapper, all);
-        }
-        return all;
+        return result;
     }
 
     private static boolean isFrameworkHandler(HandlerMethod handler) {
-        String pkg = handler.getBeanType().getPackageName();
-        return pkg.startsWith("org.springframework.");
+        return handler.getBeanType().getPackageName().startsWith("org.springframework.");
     }
 
-    private static void collectRequestBodies(HandlerMethod handler, ObjectMapper mapper, Set<JavaType> out) {
-        for (MethodParameter p : handler.getMethodParameters()) {
-            if (p.hasParameterAnnotation(RequestBody.class)) {
-                out.add(mapper.constructType(p.getGenericParameterType()));
-            }
-        }
-    }
-
-    private static void collectResponseBody(HandlerMethod handler, ObjectMapper mapper, Set<JavaType> out) {
-        out.add(mapper.constructType(handler.getMethod().getGenericReturnType()));
-    }
-
-    private static void walk(JavaType type, ObjectMapper mapper, Set<JavaType> seen) {
+    private static void addUnwrapped(JavaType type, Set<JavaType> out) {
         if (type == null) return;
         Class<?> raw = type.getRawClass();
 
         if (raw == Void.class || raw == void.class) return;
-
         if (HttpEntity.class.isAssignableFrom(raw) || Optional.class.isAssignableFrom(raw)) {
-            walk(type.containedTypeOrUnknown(0), mapper, seen);
+            addUnwrapped(type.containedTypeOrUnknown(0), out);
             return;
         }
         if (type.isContainerType()) {
-            walk(type.getContentType(), mapper, seen);
-            if (type.isMapLikeType()) walk(type.getKeyType(), mapper, seen);
+            addUnwrapped(type.getContentType(), out);
             return;
         }
         if (isScalar(raw)) return;
         if (raw.getName().startsWith("java.")) return;
-        if (!seen.add(type)) return;
 
-        BeanDescription desc = mapper.getSerializationConfig().introspect(type);
-        for (BeanPropertyDefinition prop : desc.findProperties()) {
-            walk(prop.getPrimaryType(), mapper, seen);
-        }
+        out.add(type);
     }
 
     private static boolean isScalar(Class<?> raw) {
