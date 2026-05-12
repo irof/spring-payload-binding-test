@@ -63,11 +63,10 @@ class JsonBindingContractTest extends JsonBindingContractTestBase {
 
 ## 検査内容
 
-エンドポイント毎に **方向別 (REQUEST / RESPONSE)** で検査する。
+各ペイロード型に対して deserialize → serialize → 元 JSON と等価性比較というラウンドトリップ検査を行う。リクエスト/レスポンスの区別はせず、エンドポイントから収集された型集合に対して一律に検査する (同じ型が複数エンドポイントで使われる場合は1回だけ検査され、エラーメッセージに利用エンドポイント一覧が表示される)。
 
-- **REQUEST**: サンプル JSON を deserialize し、`BeanDescription` の accessor 経由で property レベル再帰的に「null になっていないか」を検査。値の等価性は問わないため、カスタムデシリアライザによる正規化は許容。
-- **RESPONSE**: deserialize → serialize → 元 JSON と等価性比較で、シリアライザ出力が期待値と一致するか検証。
 - フレームワーク提供のハンドラ (`BasicErrorController` 等) は自動除外。
+- `Resource` / `MultipartFile` 等のフレームワーク型 (`org.springframework.*` / `jakarta.*` / `javax.*`) も自動除外。
 
 ## 値のバリエーション
 
@@ -91,7 +90,7 @@ class MinimumValuesVariation implements Variation {
 }
 ```
 
-**型ごとのバリエーション指定**: `variations(PayloadType)` を override し、各ペイロードに対して実行するバリエーション群を返す。型・方向に応じて自由に組み替え可能 (NULL を受け付けない型はリストから外す、特定型だけカスタムバリエーションを追加する、等)。
+**型ごとのバリエーション指定**: `variations(PayloadType)` を override し、各ペイロードに対して実行するバリエーション群を返す。型ごとに自由に組み替え可能 (NULL を受け付けない型はリストから外す、特定型だけカスタムバリエーションを追加する、等)。
 
 ```java
 @SpringBootTest
@@ -99,8 +98,8 @@ class JsonBindingContractTest extends JsonBindingContractTestBase {
     @Override
     protected List<Variation> variations(PayloadType payload) {
         Class<?> raw = payload.type().getRawClass();
-        // primitive を含む型は NULL response で round-trip 不可なので除外
-        if (payload.direction() == Direction.RESPONSE && (raw == SearchResult.class || raw == TodoStats.class)) {
+        // primitive を含む型は NULL variation で round-trip 不可なので除外
+        if (raw == SearchResult.class || raw == TodoStats.class) {
             return List.of(Variation.SAMPLE);
         }
         // 特定の型だけカスタムバリエーションを足すこともできる
@@ -117,7 +116,7 @@ class JsonBindingContractTest extends JsonBindingContractTestBase {
 | モード | 動作 |
 |---|---|
 | `SAMPLE` (default) | サンプル値を埋めた JSON を生成しメモリ上で検査 |
-| `WRITE` | サンプル JSON を `src/test/resources/json-binding/{request,response}/{FQN}/{variation}.json` に書き出し（型毎のディレクトリにバリエーション別ファイル） |
+| `WRITE` | サンプル JSON を `src/test/resources/json-binding/{FQN}/{variation}.json` に書き出し（型毎のディレクトリにバリエーション別ファイル） |
 | `VERIFY` | 上記ファイルを読み込み、内容との突き合わせで検査。fixture が無ければ失敗 |
 
 ### モードの指定
@@ -157,7 +156,7 @@ class JsonBindingContractTest extends JsonBindingContractTestBase {
 各テストで使用された JSON が INFO ログに pretty-print 出力される。SAMPLE モードでも実際の検査対象を目視確認できる。
 
 ```
-[SAMPLE][RESPONSE] com.example.demo.todo.TodoList
+[SAMPLE][sample] com.example.demo.todo.TodoList
 {
   "id" : "sample",
   "title" : "sample",
@@ -179,7 +178,7 @@ class JsonBindingContractTest extends JsonBindingContractTestBase {
 ./gradlew :todo-app:test
 ```
 
-5 つの型 × 方向で計 7 件の動的テストが実行される。
+6 つの型 × バリエーション (SAMPLE / NULL のうち適用される分) で複数の動的テストが実行される。
 
 ## Maven Central 公開予定
 
