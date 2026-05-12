@@ -122,6 +122,13 @@ public abstract class JsonBindingContractTestBase {
         if (raw.isPrimitive() || raw.isEnum() || raw.getName().startsWith("java.")) return;
 
         BeanDescription desc = objectMapper.getSerializationConfig().introspect(type);
+        AnnotatedMember jsonValue = desc.findJsonValueAccessor();
+        if (jsonValue != null) {
+            if (jsonValue.getValue(instance) == null) {
+                throw new AssertionError(path + " @JsonValue is null after deserialization");
+            }
+            return;
+        }
         for (BeanPropertyDefinition prop : desc.findProperties()) {
             JsonNode expectedValue = expected.get(prop.getName());
             if (expectedValue == null || expectedValue.isNull()) continue;

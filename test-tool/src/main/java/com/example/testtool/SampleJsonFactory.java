@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.BeanDescription;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.BooleanNode;
@@ -65,8 +66,12 @@ public final class SampleJsonFactory {
             return NullNode.instance;
         }
         try {
-            ObjectNode obj = mapper.createObjectNode();
             BeanDescription desc = mapper.getSerializationConfig().introspect(type);
+            AnnotatedMember jsonValue = desc.findJsonValueAccessor();
+            if (jsonValue != null) {
+                return build(mapper.constructType(jsonValue.getType()), path);
+            }
+            ObjectNode obj = mapper.createObjectNode();
             for (BeanPropertyDefinition prop : desc.findProperties()) {
                 obj.set(prop.getName(), build(prop.getPrimaryType(), path));
             }
