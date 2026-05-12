@@ -1,5 +1,5 @@
 allprojects {
-	group = "com.example"
+	group = "com.github.irof"
 	version = "0.0.1-SNAPSHOT"
 
 	repositories {
