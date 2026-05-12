@@ -8,8 +8,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
-import com.fasterxml.jackson.databind.node.NullNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.slf4j.Logger;
@@ -31,8 +29,6 @@ public abstract class JsonBindingContractTestBase {
     private static final Logger log = LoggerFactory.getLogger(JsonBindingContractTestBase.class);
 
     public enum Mode { SAMPLE, WRITE, VERIFY }
-
-    public enum Variation { SAMPLE, NULL }
 
     @Autowired
     ObjectMapper objectMapper;
@@ -67,35 +63,34 @@ public abstract class JsonBindingContractTestBase {
     List<DynamicTest> everyEndpointPayloadTypeIsJsonBindable() {
         Mode mode = mode();
         List<Variation> variations = variations();
-        SampleJsonFactory sampleFactory = new SampleJsonFactory(objectMapper);
         List<DynamicTest> tests = new ArrayList<>();
         for (PayloadType payload : EndpointPayloadTypes.collect(handlerMapping, objectMapper)) {
             for (Variation variation : variations) {
                 if (!shouldRun(payload, variation)) continue;
                 tests.add(DynamicTest.dynamicTest(
-                        "[" + mode + "][" + payload.direction() + "][" + variation + "] " + payload.type().toCanonical(),
-                        () -> run(payload, variation, mode, sampleFactory)));
+                        "[" + mode + "][" + payload.direction() + "][" + variation.name() + "] " + payload.type().toCanonical(),
+                        () -> run(payload, variation, mode)));
             }
         }
         return tests;
     }
 
-    private void run(PayloadType payload, Variation variation, Mode mode, SampleJsonFactory sampleFactory) throws Exception {
+    private void run(PayloadType payload, Variation variation, Mode mode) throws Exception {
         try {
-            runChecked(payload, variation, mode, sampleFactory);
+            runChecked(payload, variation, mode);
         } catch (Throwable t) {
-            String message = payload.type().toCanonical() + " [" + payload.direction() + "][" + variation + "] used by:\n  "
+            String message = payload.type().toCanonical() + " [" + payload.direction() + "][" + variation.name() + "] used by:\n  "
                     + String.join("\n  ", payload.endpoints()) + "\n"
                     + (t.getMessage() != null ? t.getMessage() : t.toString());
             throw new AssertionError(message, t);
         }
     }
 
-    private void runChecked(PayloadType payload, Variation variation, Mode mode, SampleJsonFactory sampleFactory) throws Exception {
-        JsonNode source = (mode == Mode.VERIFY) ? loadFromFile(payload, variation) : buildSource(payload.type(), variation, sampleFactory);
+    private void runChecked(PayloadType payload, Variation variation, Mode mode) throws Exception {
+        JsonNode source = (mode == Mode.VERIFY) ? loadFromFile(payload, variation) : variation.build(payload.type(), objectMapper);
         String sourceJson = objectMapper.writeValueAsString(source);
 
-        log.info("[{}][{}][{}] {}\n{}", mode, payload.direction(), variation, payload.type().toCanonical(), source.toPrettyString());
+        log.info("[{}][{}][{}] {}\n{}", mode, payload.direction(), variation.name(), payload.type().toCanonical(), source.toPrettyString());
 
         if (payload.direction() == Direction.REQUEST) {
             Object instance = objectMapper.readValue(sourceJson, payload.type());
@@ -112,23 +107,6 @@ public abstract class JsonBindingContractTestBase {
         if (mode == Mode.WRITE) {
             writeToFile(payload, variation, source);
         }
-    }
-
-    private JsonNode buildSource(JavaType type, Variation variation, SampleJsonFactory sampleFactory) {
-        return switch (variation) {
-            case SAMPLE -> sampleFactory.build(type);
-            case NULL -> buildAllNull(type);
-        };
-    }
-
-    private JsonNode buildAllNull(JavaType type) {
-        BeanDescription desc = objectMapper.getSerializationConfig().introspect(type);
-        if (desc.findJsonValueAccessor() != null) return NullNode.instance;
-        ObjectNode obj = objectMapper.createObjectNode();
-        for (BeanPropertyDefinition prop : desc.findProperties()) {
-            obj.putNull(prop.getName());
-        }
-        return obj;
     }
 
     private JsonNode loadFromFile(PayloadType payload, Variation variation) throws Exception {
@@ -189,7 +167,7 @@ public abstract class JsonBindingContractTestBase {
     private Path fileFor(PayloadType payload, Variation variation) {
         return jsonDirectory()
                 .resolve(payload.direction().name().toLowerCase())
-                .resolve(variation.name().toLowerCase())
-                .resolve(payload.type().getRawClass().getName() + ".json");
+                .resolve(payload.type().getRawClass().getName())
+                .resolve(variation.name() + ".json");
     }
 }

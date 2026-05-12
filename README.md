@@ -73,10 +73,28 @@ class JsonBindingContractTest extends JsonBindingContractTestBase {
 
 各 `(type, direction)` の組に対して、複数のバリエーションが**並行で**実行される（モード切り替えではなく一つのテスト実行で両方検査）。
 
+**ビルトインバリエーション:**
+
 | バリエーション | 生成される JSON | 目的 |
 |---|---|---|
-| `SAMPLE` | 全フィールドにサンプル値（"sample", `1`, enum 第一定数 等） | 通常経路のバインディング検査 |
-| `NULL` | 全フィールド `null` の object (`@JsonValue` 型は top-level `null`) | null 受容性の検査 |
+| `Variation.SAMPLE` | 全フィールドにサンプル値（"sample", `1`, enum 第一定数 等） | 通常経路のバインディング検査 |
+| `Variation.NULL` | 全フィールド `null` の object (`@JsonValue` 型は top-level `null`) | null 受容性の検査 |
+
+**カスタムバリエーション**: `Variation` インタフェースを実装すれば任意のバリエーション (境界値、最小値のみ、特定エラーケース等) を追加できる:
+
+```java
+class MinimumValuesVariation implements Variation {
+    public String name() { return "minimum"; }
+    public JsonNode build(JavaType type, ObjectMapper mapper) {
+        // ... カスタムロジック
+    }
+}
+
+@Override
+protected List<Variation> variations() {
+    return List.of(Variation.SAMPLE, Variation.NULL, new MinimumValuesVariation());
+}
+```
 
 `null` を許容しない型（コンストラクタで非 null チェックがある、primitive フィールドを持ち response の round-trip が成立しない、等）は subclass で `shouldRun(payload, variation)` を override して opt-out できる。
 
@@ -95,21 +113,12 @@ class JsonBindingContractTest extends JsonBindingContractTestBase {
 }
 ```
 
-実行したいバリエーションそのものを増減したい場合は `variations()` を override:
-
-```java
-@Override
-protected List<Variation> variations() {
-    return List.of(Variation.SAMPLE);  // SAMPLE のみ
-}
-```
-
 ## 3 つの実行モード
 
 | モード | 動作 |
 |---|---|
 | `SAMPLE` (default) | サンプル値を埋めた JSON を生成しメモリ上で検査 |
-| `WRITE` | サンプル JSON を `src/test/resources/json-binding/{request,response}/{variation}/{FQN}.json` に書き出し（バリエーション毎にファイルが分かれる） |
+| `WRITE` | サンプル JSON を `src/test/resources/json-binding/{request,response}/{FQN}/{variation}.json` に書き出し（型毎のディレクトリにバリエーション別ファイル） |
 | `VERIFY` | 上記ファイルを読み込み、内容との突き合わせで検査。fixture が無ければ失敗 |
 
 ### モードの指定

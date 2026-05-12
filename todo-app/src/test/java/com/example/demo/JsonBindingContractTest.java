@@ -5,6 +5,7 @@ import com.example.demo.todo.TodoStats;
 import com.example.testtool.EndpointPayloadTypes.Direction;
 import com.example.testtool.EndpointPayloadTypes.PayloadType;
 import com.example.testtool.JsonBindingContractTestBase;
+import com.example.testtool.Variation;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
