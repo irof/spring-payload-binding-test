@@ -6,9 +6,15 @@ import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.servlet.mvc.condition.RequestMethodsRequestCondition;
+import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -16,21 +22,26 @@ public final class EndpointPayloadTypes {
 
     public enum Direction { REQUEST, RESPONSE }
 
-    public record PayloadType(JavaType type, Direction direction) {}
+    public record PayloadType(JavaType type, Direction direction, List<String> endpoints) {}
+
+    private record TypeKey(JavaType type, Direction direction) {}
 
     private EndpointPayloadTypes() {}
 
     public static Set<PayloadType> collect(RequestMappingHandlerMapping handlerMapping, ObjectMapper objectMapper) {
-        Set<PayloadType> result = new LinkedHashSet<>();
+        Map<TypeKey, List<String>> accum = new LinkedHashMap<>();
         handlerMapping.getHandlerMethods().forEach((info, handler) -> {
             if (isFrameworkHandler(handler)) return;
+            String endpoint = describeEndpoint(info, handler);
             for (MethodParameter p : handler.getMethodParameters()) {
                 if (p.hasParameterAnnotation(RequestBody.class)) {
-                    addUnwrapped(objectMapper.constructType(p.getGenericParameterType()), Direction.REQUEST, result);
+                    addUnwrapped(objectMapper.constructType(p.getGenericParameterType()), Direction.REQUEST, endpoint, accum);
                 }
             }
-            addUnwrapped(objectMapper.constructType(handler.getMethod().getGenericReturnType()), Direction.RESPONSE, result);
+            addUnwrapped(objectMapper.constructType(handler.getMethod().getGenericReturnType()), Direction.RESPONSE, endpoint, accum);
         });
+        Set<PayloadType> result = new LinkedHashSet<>();
+        accum.forEach((key, eps) -> result.add(new PayloadType(key.type, key.direction, List.copyOf(eps))));
         return result;
     }
 
@@ -38,23 +49,34 @@ public final class EndpointPayloadTypes {
         return handler.getBeanType().getPackageName().startsWith("org.springframework.");
     }
 
-    private static void addUnwrapped(JavaType type, Direction direction, Set<PayloadType> out) {
+    private static String describeEndpoint(RequestMappingInfo info, HandlerMethod handler) {
+        RequestMethodsRequestCondition methods = info.getMethodsCondition();
+        String httpMethod = methods.getMethods().isEmpty() ? "ANY" : methods.getMethods().iterator().next().name();
+        String path = info.getPathPatternsCondition() != null
+                ? info.getPathPatternsCondition().getPatterns().stream().findFirst().map(Object::toString).orElse("?")
+                : "?";
+        String handlerLabel = handler.getMethod().getDeclaringClass().getSimpleName()
+                + "#" + handler.getMethod().getName();
+        return httpMethod + " " + path + " (" + handlerLabel + ")";
+    }
+
+    private static void addUnwrapped(JavaType type, Direction direction, String endpoint, Map<TypeKey, List<String>> accum) {
         if (type == null) return;
         Class<?> raw = type.getRawClass();
 
         if (raw == Void.class || raw == void.class) return;
         if (HttpEntity.class.isAssignableFrom(raw) || Optional.class.isAssignableFrom(raw)) {
-            addUnwrapped(type.containedTypeOrUnknown(0), direction, out);
+            addUnwrapped(type.containedTypeOrUnknown(0), direction, endpoint, accum);
             return;
         }
         if (type.isContainerType()) {
-            addUnwrapped(type.getContentType(), direction, out);
+            addUnwrapped(type.getContentType(), direction, endpoint, accum);
             return;
         }
         if (isScalar(raw)) return;
         if (raw.getName().startsWith("java.")) return;
 
-        out.add(new PayloadType(type, direction));
+        accum.computeIfAbsent(new TypeKey(type, direction), k -> new ArrayList<>()).add(endpoint);
     }
 
     private static boolean isScalar(Class<?> raw) {

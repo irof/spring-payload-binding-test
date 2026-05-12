@@ -61,6 +61,17 @@ public abstract class JsonBindingContractTestBase {
     }
 
     private void run(PayloadType payload, Mode mode, SampleJsonFactory sampleFactory) throws Exception {
+        try {
+            runChecked(payload, mode, sampleFactory);
+        } catch (Throwable t) {
+            String message = payload.type().toCanonical() + " [" + payload.direction() + "] used by:\n  "
+                    + String.join("\n  ", payload.endpoints()) + "\n"
+                    + (t.getMessage() != null ? t.getMessage() : t.toString());
+            throw new AssertionError(message, t);
+        }
+    }
+
+    private void runChecked(PayloadType payload, Mode mode, SampleJsonFactory sampleFactory) throws Exception {
         JsonNode source = (mode == Mode.VERIFY) ? loadFromFile(payload) : sampleFactory.build(payload.type());
         String sourceJson = objectMapper.writeValueAsString(source);
 
@@ -75,8 +86,7 @@ public abstract class JsonBindingContractTestBase {
             String serialized = objectMapper.writeValueAsString(instance);
             JsonNode normalizedSource = objectMapper.readTree(sourceJson);
             JsonNode actual = objectMapper.readTree(serialized);
-            assertEquals(normalizedSource, actual,
-                    () -> "serialized JSON differs from source for " + payload.type().toCanonical());
+            assertEquals(normalizedSource, actual, "serialized JSON differs from source");
         }
 
         if (mode == Mode.WRITE) {
