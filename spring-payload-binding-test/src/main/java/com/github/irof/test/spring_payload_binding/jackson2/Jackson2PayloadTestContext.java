@@ -46,9 +46,7 @@ class Jackson2PayloadTestContext implements PayloadTestContext {
 
     @Override
     public void runRoundTrip(Variation variation, Path jsonDirectory, boolean writeMissing) throws Exception {
-        if (!(variation instanceof Jackson2Variation j2variation)) {
-            throw new IllegalArgumentException("Jackson2PayloadTestContext requires Jackson2Variation, got: " + variation.getClass().getName());
-        }
+        Jackson2Variation j2variation = resolveVariation(variation);
         Path file = jsonDirectory
                 .resolve(payloadType.getRawClass().getName())
                 .resolve(variation.name() + ".json");
@@ -77,5 +75,18 @@ class Jackson2PayloadTestContext implements PayloadTestContext {
         JsonNode normalizedSource = mapper.readTree(sourceJson);
         JsonNode actual = mapper.readTree(serialized);
         assertEquals(normalizedSource, actual, "round-trip JSON differs from source");
+    }
+
+    private static Jackson2Variation resolveVariation(Variation variation) {
+        if (variation instanceof Jackson2Variation j2v) {
+            return j2v;
+        }
+        return switch (variation.name()) {
+            case "sample" -> Jackson2Variation.SAMPLE;
+            case "null" -> Jackson2Variation.NULL;
+            case "empty" -> Jackson2Variation.EMPTY;
+            default -> throw new IllegalArgumentException(
+                    "Unknown variation: " + variation.name() + ". Use Jackson2Variation or Variation.SAMPLE/NULL/EMPTY.");
+        };
     }
 }

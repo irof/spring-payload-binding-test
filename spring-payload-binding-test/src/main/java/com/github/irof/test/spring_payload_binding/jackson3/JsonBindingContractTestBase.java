@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.AbstractJacksonHttpMessageConverter;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
@@ -26,9 +25,6 @@ public abstract class JsonBindingContractTestBase extends com.github.irof.test.s
 
     @Autowired(required = false)
     private ObjectMapper autowiredObjectMapper;
-
-    @Autowired
-    private RequestMappingHandlerAdapter handlerAdapter;
 
     /**
      * 使用する ObjectMapper を取得します。
@@ -65,7 +61,7 @@ public abstract class JsonBindingContractTestBase extends com.github.irof.test.s
      */
     @Override
     protected List<Variation> variations(PayloadTestContext ctx) {
-        return List.of(Jackson3Variation.SAMPLE, Jackson3Variation.NULL, Jackson3Variation.EMPTY);
+        return List.of(Variation.SAMPLE, Variation.NULL, Variation.EMPTY);
     }
 
     @Override

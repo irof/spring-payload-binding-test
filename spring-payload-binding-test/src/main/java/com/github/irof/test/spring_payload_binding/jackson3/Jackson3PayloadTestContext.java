@@ -46,9 +46,7 @@ class Jackson3PayloadTestContext implements PayloadTestContext {
 
     @Override
     public void runRoundTrip(Variation variation, Path jsonDirectory, boolean writeMissing) throws Exception {
-        if (!(variation instanceof Jackson3Variation j3variation)) {
-            throw new IllegalArgumentException("Jackson3PayloadTestContext requires Jackson3Variation, got: " + variation.getClass().getName());
-        }
+        Jackson3Variation j3variation = resolveVariation(variation);
         Path file = jsonDirectory
                 .resolve(payloadType.getRawClass().getName())
                 .resolve(variation.name() + ".json");
@@ -77,5 +75,18 @@ class Jackson3PayloadTestContext implements PayloadTestContext {
         JsonNode normalizedSource = mapper.readTree(sourceJson);
         JsonNode actual = mapper.readTree(serialized);
         assertEquals(normalizedSource, actual, "round-trip JSON differs from source");
+    }
+
+    private static Jackson3Variation resolveVariation(Variation variation) {
+        if (variation instanceof Jackson3Variation j3v) {
+            return j3v;
+        }
+        return switch (variation.name()) {
+            case "sample" -> Jackson3Variation.SAMPLE;
+            case "null" -> Jackson3Variation.NULL;
+            case "empty" -> Jackson3Variation.EMPTY;
+            default -> throw new IllegalArgumentException(
+                    "Unknown variation: " + variation.name() + ". Use Jackson3Variation or Variation.SAMPLE/NULL/EMPTY.");
+        };
     }
 }

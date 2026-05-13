@@ -4,6 +4,7 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import java.nio.file.Path;
@@ -14,33 +15,41 @@ import java.util.List;
 /**
  * JSONバインディングのコントラストテストの基底クラスです。
  * エンドポイントのペイロード型を自動的に収集し、バリエーションごとのJSONバインディングテストを生成します。
- * JSON ライブラリに依存しない骨格を提供します。Jackson2 を使う場合は
- * {@code com.github.irof.test.spring_payload_binding.jackson2.JsonBindingContractTestBase} を継承してください。
+ * クラスパスから Jackson2 または Jackson3 を自動検出して動作します。
+ * 明示的にバージョンを指定する場合は
+ * {@code com.github.irof.test.spring_payload_binding.jackson2.JsonBindingContractTestBase} または
+ * {@code com.github.irof.test.spring_payload_binding.jackson3.JsonBindingContractTestBase} を継承してください。
  */
-public abstract class JsonBindingContractTestBase {
+public class JsonBindingContractTestBase {
 
     @Autowired
     @Qualifier("requestMappingHandlerMapping")
     private RequestMappingHandlerMapping handlerMapping;
 
+    @Autowired
+    protected RequestMappingHandlerAdapter handlerAdapter;
+
     /**
      * ペイロード型ごとのテストコンテキストを収集します。
-     * JSON ライブラリのバージョンに応じた実装を提供してください。
+     * デフォルト実装はクラスパスから Jackson バージョンを自動検出します。
      *
      * @param handlerMapping ハンドラーマッピング
      * @return テストコンテキストのコレクション
      */
-    protected abstract Collection<? extends PayloadTestContext> collectPayloadContexts(RequestMappingHandlerMapping handlerMapping);
+    protected Collection<? extends PayloadTestContext> collectPayloadContexts(RequestMappingHandlerMapping handlerMapping) {
+        return detectProvider().collect(handlerMapping, handlerAdapter);
+    }
 
     /**
      * 各ペイロードに対して実行するバリエーション群を返します。
-     * 型ごとに自由に組み替え可能です (NULL を受け付けない型はリストから外す、特定エンドポイントだけ
-     * カスタムバリエーションを追加する、等)。
+     * デフォルトは全ペイロードで {@link Variation#SAMPLE}, {@link Variation#NULL}, {@link Variation#EMPTY} です。
      *
      * @param ctx ペイロードのテストコンテキスト
      * @return バリエーションのリスト
      */
-    protected abstract List<Variation> variations(PayloadTestContext ctx);
+    protected List<Variation> variations(PayloadTestContext ctx) {
+        return List.of(Variation.SAMPLE, Variation.NULL, Variation.EMPTY);
+    }
 
     /**
      * JSONファイルを格納するディレクトリのパスを返します。
@@ -55,7 +64,6 @@ public abstract class JsonBindingContractTestBase {
     /**
      * ファイルが存在せず build した場合に、その JSON を fixture ファイルへ書き出すかどうかを返します。
      * デフォルトはシステムプロパティ {@code -Djson.binding.write=true} を見ます。
-     * Subclass で常時 true を返せば CI で全 fixture を自動 pin するような運用も可能です。
      *
      * @return ファイルを書き出す場合は true
      */
@@ -85,5 +93,24 @@ public abstract class JsonBindingContractTestBase {
                     + (t.getMessage() != null ? t.getMessage() : t.toString());
             throw new AssertionError(message, t);
         }
+    }
+
+    private JacksonContextProvider detectProvider() {
+        try {
+            Class.forName("tools.jackson.databind.ObjectMapper");
+            return createJackson3Provider();
+        } catch (ClassNotFoundException e) {
+            return createJackson2Provider();
+        }
+    }
+
+    // Jackson3 クラスを直接参照しているため、このメソッドはJackson3が利用可能な場合のみ呼び出すこと
+    private JacksonContextProvider createJackson3Provider() {
+        return new com.github.irof.test.spring_payload_binding.jackson3.JacksonContextProvider();
+    }
+
+    // Jackson2 クラスを直接参照しているため、このメソッドはJackson3が利用不可の場合のみ呼び出すこと
+    private JacksonContextProvider createJackson2Provider() {
+        return new com.github.irof.test.spring_payload_binding.jackson2.JacksonContextProvider();
     }
 }
