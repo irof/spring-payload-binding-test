@@ -20,11 +20,11 @@ public final class NullVariation implements Jackson3Variation {
     }
 
     @Override
-    public JsonNode build(JavaType type, ObjectMapper mapper) {
-        ClassIntrospector ci = mapper.serializationConfig().classIntrospectorInstance();
+    public JsonNode build(JavaType type, ObjectMapper objectMapper) {
+        ClassIntrospector ci = objectMapper.serializationConfig().classIntrospectorInstance();
         var desc = ci.introspectForSerialization(type, ci.introspectClassAnnotations(type));
         if (desc.findJsonValueAccessor() != null) return NullNode.instance;
-        ObjectNode obj = mapper.createObjectNode();
+        ObjectNode obj = objectMapper.createObjectNode();
         for (BeanPropertyDefinition prop : desc.findProperties()) {
             obj.putNull(prop.getName());
         }
