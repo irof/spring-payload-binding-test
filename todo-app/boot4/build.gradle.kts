@@ -11,9 +11,6 @@ dependencies {
 	testImplementation(project(":spring-payload-binding-test"))
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
-	// FIXME 現状はJackson2が必要
-	testRuntimeOnly("com.fasterxml.jackson.core:jackson-databind")
-	testRuntimeOnly("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 }
 
 sourceSets {

@@ -5,9 +5,10 @@ plugins {
 }
 
 dependencies {
-	compileOnly("org.springframework:spring-webmvc:6.2.18")
+	compileOnly("org.springframework:spring-webmvc:7.0.1")
 	compileOnly("com.fasterxml.jackson.core:jackson-databind:2.21.2")
 	compileOnly("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.21.2")
+	compileOnly("tools.jackson.core:jackson-databind:3.0.2")
 	api("org.junit.jupiter:junit-jupiter-api:5.12.2")
 	api("org.slf4j:slf4j-api:2.0.17")
 }
