@@ -9,6 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import java.nio.file.Files;
@@ -27,10 +29,15 @@ public abstract class JsonBindingContractTestBase {
     private static final Logger log = LoggerFactory.getLogger(JsonBindingContractTestBase.class);
 
     /**
-     * JSONの読み書きに使用する ObjectMapper
+     * JSONの読み書きに使用する ObjectMapper を保持します。
+     */
+    private ObjectMapper objectMapper;
+
+    /**
+     * ObjectMapper を取得するために使用する RequestMappingHandlerAdapter
      */
     @Autowired
-    ObjectMapper objectMapper;
+    RequestMappingHandlerAdapter handlerAdapter;
 
     /**
      * ハンドラーメソッドの情報を取得するために使用する RequestMappingHandlerMapping
@@ -38,6 +45,24 @@ public abstract class JsonBindingContractTestBase {
     @Autowired
     @Qualifier("requestMappingHandlerMapping")
     RequestMappingHandlerMapping handlerMapping;
+
+    /**
+     * 使用する ObjectMapper を取得します。
+     * RequestMappingHandlerAdapter に登録されている MappingJackson2HttpMessageConverter から取得します。
+     *
+     * @return ObjectMapper
+     */
+    protected ObjectMapper getObjectMapper() {
+        if (objectMapper == null) {
+            objectMapper = handlerAdapter.getMessageConverters().stream()
+                    .filter(MappingJackson2HttpMessageConverter.class::isInstance)
+                    .map(MappingJackson2HttpMessageConverter.class::cast)
+                    .map(MappingJackson2HttpMessageConverter::getObjectMapper)
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalStateException("MappingJackson2HttpMessageConverter not found"));
+        }
+        return objectMapper;
+    }
 
     /**
      * JSONファイルを格納するディレクトリのパスを返します。
@@ -80,8 +105,9 @@ public abstract class JsonBindingContractTestBase {
      */
     @TestFactory
     List<DynamicTest> everyEndpointPayloadTypeIsJsonBindable() {
+        ObjectMapper mapper = getObjectMapper();
         List<DynamicTest> tests = new ArrayList<>();
-        for (PayloadType payload : EndpointPayloadTypes.collect(handlerMapping, objectMapper)) {
+        for (PayloadType payload : EndpointPayloadTypes.collect(handlerMapping, mapper)) {
             for (Variation variation : variations(payload)) {
                 tests.add(DynamicTest.dynamicTest(
                         "[" + variation.name() + "] " + payload.type().toCanonical(),
@@ -103,30 +129,31 @@ public abstract class JsonBindingContractTestBase {
     }
 
     private void runChecked(PayloadType payload, Variation variation) throws Exception {
+        ObjectMapper mapper = getObjectMapper();
         Path file = fileFor(payload, variation);
         JsonNode source;
         String origin;
         boolean built = !Files.exists(file);
         if (built) {
-            source = variation.build(payload.type(), objectMapper);
+            source = variation.build(payload.type(), mapper);
             origin = "built";
         } else {
-            source = objectMapper.readTree(file.toFile());
+            source = mapper.readTree(file.toFile());
             origin = "file " + file;
         }
-        String sourceJson = objectMapper.writeValueAsString(source);
+        String sourceJson = mapper.writeValueAsString(source);
 
         log.info("[{}] {} ({})\n{}", variation.name(), payload.type().toCanonical(), origin, source.toPrettyString());
 
-        Object instance = objectMapper.readValue(sourceJson, payload.type());
-        String serialized = objectMapper.writeValueAsString(instance);
-        JsonNode normalizedSource = objectMapper.readTree(sourceJson);
-        JsonNode actual = objectMapper.readTree(serialized);
+        Object instance = mapper.readValue(sourceJson, payload.type());
+        String serialized = mapper.writeValueAsString(instance);
+        JsonNode normalizedSource = mapper.readTree(sourceJson);
+        JsonNode actual = mapper.readTree(serialized);
         assertEquals(normalizedSource, actual, "round-trip JSON differs from source");
 
         if (built && writeMissingFiles()) {
             Files.createDirectories(file.getParent());
-            objectMapper.writerWithDefaultPrettyPrinter().writeValue(file.toFile(), source);
+            mapper.writerWithDefaultPrettyPrinter().writeValue(file.toFile(), source);
             log.info("wrote fixture: {}", file);
         }
     }
