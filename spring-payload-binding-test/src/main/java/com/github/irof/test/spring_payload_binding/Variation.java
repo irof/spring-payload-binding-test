@@ -1,8 +1,11 @@
-package com.github.irof.test.spring_payload_binding.jackson2;
+package com.github.irof.test.spring_payload_binding;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.irof.test.spring_payload_binding.jackson2.EmptyVariation;
+import com.github.irof.test.spring_payload_binding.jackson2.NullVariation;
+import com.github.irof.test.spring_payload_binding.jackson2.SampleVariation;
 
 /**
  * 1 つのペイロード型に対する JSON のバリエーションを生成するインタフェースです。

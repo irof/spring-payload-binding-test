@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.fasterxml.jackson.databind.node.*;
+import com.github.irof.test.spring_payload_binding.Variation;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -16,7 +17,7 @@ import java.util.Set;
  * String→"", コレクション→[], primitive→デフォルト値 (0/false)、
  * ネスト object は再帰的に空フィールドを持つ object、@JsonValue 型は値型を辿った先の empty を生成します。
  */
-final class EmptyVariation implements Variation {
+public final class EmptyVariation implements Variation {
 
     @Override
     public String name() {

@@ -7,12 +7,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.irof.test.spring_payload_binding.Variation;
 
 /**
  * 全フィールドを null にするバリエーションです。
  * {@code @JsonValue} 型の場合は top-level null を生成します。
  */
-final class NullVariation implements Variation {
+public final class NullVariation implements Variation {
 
     @Override
     public String name() {
