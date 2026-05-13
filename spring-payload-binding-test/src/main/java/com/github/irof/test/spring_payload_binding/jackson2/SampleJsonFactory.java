@@ -22,6 +22,9 @@ public final class SampleJsonFactory {
 
     private final ObjectMapper mapper;
 
+    /**
+     * @param mapper 使用する ObjectMapper
+     */
     public SampleJsonFactory(ObjectMapper mapper) {
         this.mapper = mapper;
     }

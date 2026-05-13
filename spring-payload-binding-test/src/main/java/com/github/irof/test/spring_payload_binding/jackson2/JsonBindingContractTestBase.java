@@ -47,6 +47,8 @@ public abstract class JsonBindingContractTestBase {
     /**
      * 使用する ObjectMapper を取得します。
      * RequestMappingHandlerAdapter に登録されている MappingJackson2HttpMessageConverter から取得します。
+     *
+     * @return ObjectMapper
      */
     protected ObjectMapper getObjectMapper() {
         if (objectMapper == null) {
@@ -75,6 +77,8 @@ public abstract class JsonBindingContractTestBase {
     /**
      * JSONファイルを格納するディレクトリのパスを返します。
      * デフォルトは "src/test/resources/json-binding" です。
+     *
+     * @return JSONディレクトリのパス
      */
     protected Path jsonDirectory() {
         return Path.of("src/test/resources/json-binding");
@@ -84,6 +88,8 @@ public abstract class JsonBindingContractTestBase {
      * ファイルが存在せず build した場合に、その JSON を fixture ファイルへ書き出すかどうかを返します。
      * デフォルトはシステムプロパティ {@code -Djson.binding.write=true} を見ます。
      * Subclass で常時 true を返せば CI で全 fixture を自動 pin するような運用も可能です。
+     *
+     * @return ファイルを書き出す場合は true
      */
     protected boolean writeMissingFiles() {
         return Boolean.getBoolean("json.binding.write");
@@ -94,6 +100,9 @@ public abstract class JsonBindingContractTestBase {
      * 型ごとに自由に組み替え可能です (NULL を受け付けない型はリストから外す、特定エンドポイントだけ
      * カスタムバリエーションを追加する、等)。
      * デフォルトは全ペイロードで SAMPLE, NULL, EMPTY です。
+     *
+     * @param payload ペイロード型
+     * @return バリエーションのリスト
      */
     protected List<Variation> variations(PayloadType payload) {
         return List.of(Variation.SAMPLE, Variation.NULL, Variation.EMPTY);
