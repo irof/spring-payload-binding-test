@@ -21,6 +21,7 @@ public class JacksonContextProvider implements com.github.irof.test.spring_paylo
 
     private static final Logger log = LoggerFactory.getLogger(JacksonContextProvider.class);
 
+    @SuppressWarnings("removal")
     @Override
     public Collection<? extends PayloadTestContext> collect(RequestMappingHandlerMapping mapping, RequestMappingHandlerAdapter adapter) {
         ObjectMapper mapper = adapter.getMessageConverters().stream()
