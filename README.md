@@ -1,4 +1,4 @@
-# spring-boot-demo
+# spring-payload-binding-test
 
 Spring Bootのエンドポイントに使用される JSON バインディングを検証すテストツールです。
 
@@ -9,28 +9,31 @@ SpringBoot4.0.x対応は対応と公開方法を検討中。
 
 ```mermaid
 flowchart TD
-    subgraph Collection[1. 型の収集]
-        A[RequestMappingHandlerMapping] --> B[EndpointPayloadTypes]
-        B --> C[PayloadType のセット]
-    end
+  subgraph Collection[1. 型の収集]
+    C1[RestControllerのRequest/Responseを収集]
+  end
 
-    subgraph TestExecution[2. テストの実行]
-        C --> D[JsonBindingContractTestBase]
-        D --> E{各型とバリエーションについて}
-        E --> F{Fixtureファイルが存在するか?}
-        F -- Yes --> G[ファイルを読み込む]
-        F -- No --> H[Variation.build で生成する]
-        G --> I[ラウンドトリップテスト]
-        H --> I
-        I --> J[JSON → Java Object → JSON]
-        J --> K{等価か?}
-        K -- No --> L[Assertion Error]
-        K -- Yes --> M{生成かつ write=true か?}
-        M -- Yes --> N[ファイルを保存する]
-        M -- No --> O[テスト通過]
-        N --> O
-        O --> E
-    end
+  subgraph Prepare[2. JSON準備]
+    E1["fixtureファイルが存在するか？"]
+    E1 -- Yes --> E2-1[ファイルを読み込む]
+    E1 -- No --> E2-2[Variation.build で生成する]
+  end
+
+  subgraph Execution[3. ラインドトリップテスト]
+    T1["JSON（IN） -> Java Object"]
+    T2["Java Object -> JSON（OUT）"]
+    TC{"JSON IN/OUT が等価か？"}
+    T1 --> T2 --> TC
+    TC -- NO --> T_error[Assertion Error]
+    TC -- Yes --> TW{"fixtureファイルなし && writeMissingFiles"}
+    T_success["パス"]
+    TW -- NO --> T_success
+    TW -- Yes --> T_write["ファイルを保存する"]
+    T_write --> T_success
+  end
+
+  Collection --> Prepare
+  Prepare --> Execution
 ```
 
 ## Getting Started
