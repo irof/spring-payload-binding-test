@@ -1,0 +1,13 @@
+{
+  "keyword" : "sample",
+  "filter" : {
+    "from" : "2024-01-01",
+    "to" : "2024-01-01",
+    "priorities" : [ "LOW" ],
+    "includeCompleted" : true
+  },
+  "page" : {
+    "number" : 1,
+    "size" : 1
+  }
+}

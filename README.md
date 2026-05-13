@@ -2,8 +2,8 @@
 
 Spring Bootのエンドポイントに使用される JSON バインディングを検証すテストツールです。
 
-`0.0.1` はSpringBoot3.5.xを対象にしています。
-SpringBoot4.0.x対応は対応と公開方法を検討中。
+Spring Boot 3.5.x / 4.0.x で利用できます。
+このライブラリは Spring Boot BOM を利用者に強制しません。
 
 ## 仕組み
 
@@ -47,6 +47,7 @@ flowchart TB
 ### 依存を追加する
 
 `com.github.irof:spring-payload-binding-test` をテストスコープで依存に追加します。
+Spring Boot のバージョンは利用側アプリの設定に従います。
 
 Gradle (`build.gradle.kts`):
 
@@ -212,4 +213,21 @@ SLF4Jを使用したログを
 
 ### 利用例
 
-`todo-app` がテストを兼ねた利用例になっています。
+- `todo-app`: Spring Boot 3.5.x 用の利用例
+- `todo-app-boot4`: Spring Boot 4.0.x 用の利用例
+
+互換性確認:
+
+```sh
+# ライブラリ単体
+./gradlew :spring-payload-binding-test:test
+
+# Spring Boot 3.5.x サンプル
+./gradlew :todo-app:test
+
+# Spring Boot 4.0.x サンプル
+./gradlew :todo-app-boot4:test
+
+# 3/4 サンプルをまとめて実行
+./gradlew testBootCompatibility
+```

@@ -5,10 +5,12 @@ plugins {
 }
 
 dependencies {
-	api(platform("org.springframework.boot:spring-boot-dependencies:3.5.14"))
+	implementation(platform("org.springframework.boot:spring-boot-dependencies:3.5.14"))
 	api("org.springframework:spring-webmvc")
 	api("com.fasterxml.jackson.core:jackson-databind")
-	api("org.springframework.boot:spring-boot-starter-test")
+	api("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+	compileOnly("org.junit.jupiter:junit-jupiter-api")
+	compileOnly("org.slf4j:slf4j-api")
 }
 
 java {

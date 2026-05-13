@@ -1,7 +1,11 @@
 package com.github.irof.test.spring_payload_binding;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.irof.test.spring_payload_binding.EndpointPayloadTypes.PayloadType;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
@@ -9,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
@@ -33,6 +37,9 @@ public abstract class JsonBindingContractTestBase {
      */
     private ObjectMapper objectMapper;
 
+    @Autowired(required = false)
+    ObjectMapper autowiredObjectMapper;
+
     /**
      * ObjectMapper を取得するために使用する RequestMappingHandlerAdapter
      */
@@ -54,12 +61,24 @@ public abstract class JsonBindingContractTestBase {
      */
     protected ObjectMapper getObjectMapper() {
         if (objectMapper == null) {
-            objectMapper = handlerAdapter.getMessageConverters().stream()
-                    .filter(MappingJackson2HttpMessageConverter.class::isInstance)
-                    .map(MappingJackson2HttpMessageConverter.class::cast)
-                    .map(MappingJackson2HttpMessageConverter::getObjectMapper)
-                    .findFirst()
-                    .orElseThrow(() -> new IllegalStateException("MappingJackson2HttpMessageConverter not found"));
+            if (autowiredObjectMapper != null) {
+                objectMapper = autowiredObjectMapper;
+            } else {
+                objectMapper = handlerAdapter.getMessageConverters().stream()
+                        .filter(AbstractJackson2HttpMessageConverter.class::isInstance)
+                        .map(AbstractJackson2HttpMessageConverter.class::cast)
+                        .map(AbstractJackson2HttpMessageConverter::getObjectMapper)
+                        .findFirst()
+                        .orElseGet(() -> {
+                            log.warn("Jackson HttpMessageConverter not found; falling back to plain ObjectMapper");
+                            return JsonMapper.builder()
+                                    .disable(MapperFeature.REQUIRE_HANDLERS_FOR_JAVA8_TIMES)
+                                    .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                                    .addModule(new JavaTimeModule())
+                                    .findAndAddModules()
+                                    .build();
+                        });
+            }
         }
         return objectMapper;
     }

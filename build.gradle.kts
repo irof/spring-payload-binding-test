@@ -21,3 +21,9 @@ subprojects {
 		}
 	}
 }
+
+tasks.register("testBootCompatibility") {
+	group = "verification"
+	description = "Runs both Spring Boot 3 and 4 sample app tests."
+	dependsOn(":todo-app:test", ":todo-app-boot4:test")
+}
