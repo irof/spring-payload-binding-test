@@ -54,7 +54,7 @@ public final class SampleVariation implements Jackson3Variation {
         if (type.isMapLikeType()) {
             ObjectNode obj = mapper.createObjectNode();
             JsonNode keyNode = buildInternal(type.getKeyType(), path, ci, mapper);
-            obj.set(keyNode.asText(), buildInternal(type.getContentType(), path, ci, mapper));
+            obj.set(keyNode.asString(), buildInternal(type.getContentType(), path, ci, mapper));
             return obj;
         }
         if (PayloadTypeUtils.isFrameworkType(raw)) {
