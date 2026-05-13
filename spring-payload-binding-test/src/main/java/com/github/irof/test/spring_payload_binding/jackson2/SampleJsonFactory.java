@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.fasterxml.jackson.databind.node.*;
+import com.github.irof.test.spring_payload_binding.PayloadTypeUtils;
 
 import java.net.URI;
 import java.net.URL;
@@ -58,7 +59,7 @@ public final class SampleJsonFactory {
             obj.set(keyNode.asText(), build(type.getContentType(), path));
             return obj;
         }
-        if (EndpointPayloadTypes.isFrameworkType(raw)) {
+        if (PayloadTypeUtils.isFrameworkType(raw)) {
             return NullNode.instance;
         }
         if (!path.add(type)) {

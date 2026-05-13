@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.fasterxml.jackson.databind.node.*;
+import com.github.irof.test.spring_payload_binding.PayloadTypeUtils;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -34,7 +36,7 @@ public final class EmptyVariation implements Jackson2Variation {
         if (scalar != null) return scalar;
         if (type.isArrayType() || type.isCollectionLikeType()) return objectMapper.createArrayNode();
         if (type.isMapLikeType()) return objectMapper.createObjectNode();
-        if (EndpointPayloadTypes.isFrameworkType(raw)) return NullNode.instance;
+        if (PayloadTypeUtils.isFrameworkType(raw)) return NullNode.instance;
         if (!path.add(type)) return NullNode.instance;
         try {
             BeanDescription desc = objectMapper.getSerializationConfig().introspect(type);

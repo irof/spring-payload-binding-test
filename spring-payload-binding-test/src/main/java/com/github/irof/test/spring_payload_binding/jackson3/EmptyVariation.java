@@ -1,5 +1,6 @@
 package com.github.irof.test.spring_payload_binding.jackson3;
 
+import com.github.irof.test.spring_payload_binding.PayloadTypeUtils;
 import tools.jackson.databind.JavaType;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
@@ -36,7 +37,7 @@ public final class EmptyVariation implements Jackson3Variation {
         if (scalar != null) return scalar;
         if (type.isArrayType() || type.isCollectionLikeType()) return mapper.createArrayNode();
         if (type.isMapLikeType()) return mapper.createObjectNode();
-        if (EndpointPayloadTypes.isFrameworkType(raw)) return NullNode.instance;
+        if (PayloadTypeUtils.isFrameworkType(raw)) return NullNode.instance;
         if (!path.add(type)) return NullNode.instance;
         try {
             var desc = ci.introspectForSerialization(type, ci.introspectClassAnnotations(type));
