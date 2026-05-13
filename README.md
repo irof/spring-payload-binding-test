@@ -5,6 +5,34 @@ Spring Bootのエンドポイントに使用される JSON バインディング
 `0.0.1` はSpringBoot3.5.xを対象にしています。
 SpringBoot4.0.x対応は対応と公開方法を検討中。
 
+## 仕組み
+
+```mermaid
+flowchart TD
+    subgraph Collection[1. 型の収集]
+        A[RequestMappingHandlerMapping] --> B[EndpointPayloadTypes]
+        B --> C[PayloadType のセット]
+    end
+
+    subgraph TestExecution[2. テストの実行]
+        C --> D[JsonBindingContractTestBase]
+        D --> E{各型とバリエーションについて}
+        E --> F{Fixtureファイルが存在するか?}
+        F -- Yes --> G[ファイルを読み込む]
+        F -- No --> H[Variation.build で生成する]
+        G --> I[ラウンドトリップテスト]
+        H --> I
+        I --> J[JSON → Java Object → JSON]
+        J --> K{等価か?}
+        K -- No --> L[Assertion Error]
+        K -- Yes --> M{生成かつ write=true か?}
+        M -- Yes --> N[ファイルを保存する]
+        M -- No --> O[テスト通過]
+        N --> O
+        O --> E
+    end
+```
+
 ## Getting Started
 
 1. 依存を追加する
