@@ -14,6 +14,12 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  */
 public final class NullVariation implements Jackson2Variation {
 
+    /**
+     * コンストラクタ
+     */
+    public NullVariation() {
+    }
+
     @Override
     public String name() {
         return "null";

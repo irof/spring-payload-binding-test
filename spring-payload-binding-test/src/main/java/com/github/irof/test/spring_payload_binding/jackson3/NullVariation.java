@@ -14,6 +14,12 @@ import tools.jackson.databind.node.ObjectNode;
  */
 public final class NullVariation implements Jackson3Variation {
 
+    /**
+     * コンストラクタ
+     */
+    public NullVariation() {
+    }
+
     @Override
     public String name() {
         return "null";

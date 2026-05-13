@@ -33,6 +33,13 @@ public abstract class JsonBindingContractTestBase {
     protected RequestMappingHandlerAdapter handlerAdapter;
 
     /**
+     * コンストラクタ
+     * フィールドはAutowiredするのでコンストラクタでは受け取らない
+     */
+    public JsonBindingContractTestBase() {
+    }
+
+    /**
      * ペイロード型ごとのテストコンテキストを収集します。
      * デフォルト実装はクラスパスから Jackson バージョンを自動検出します。
      *

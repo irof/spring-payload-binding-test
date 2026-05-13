@@ -20,6 +20,12 @@ public class JacksonContextProvider implements com.github.irof.test.spring_paylo
 
     private static final Logger log = LoggerFactory.getLogger(JacksonContextProvider.class);
 
+    /**
+     * コンストラクタ
+     */
+    public JacksonContextProvider() {
+    }
+
     @Override
     public Collection<? extends PayloadTestContext> collect(RequestMappingHandlerMapping mapping, List<HttpMessageConverter<?>> messageConverters) {
         ObjectMapper mapper = messageConverters.stream()

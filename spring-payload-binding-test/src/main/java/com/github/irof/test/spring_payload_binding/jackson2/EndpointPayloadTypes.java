@@ -29,6 +29,9 @@ public final class EndpointPayloadTypes {
         }
     }
 
+    /**
+     * コンストラクタ（インスタンス化抑止）
+     */
     private EndpointPayloadTypes() {
     }
 

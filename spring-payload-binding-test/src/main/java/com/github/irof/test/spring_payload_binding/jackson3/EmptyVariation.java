@@ -19,6 +19,12 @@ import java.util.Set;
  */
 public final class EmptyVariation implements Jackson3Variation {
 
+    /**
+     * コンストラクタ
+     */
+    public EmptyVariation() {
+    }
+
     @Override
     public String name() {
         return "empty";

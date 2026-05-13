@@ -21,6 +21,12 @@ import java.util.UUID;
  */
 public final class SampleVariation implements Jackson2Variation {
 
+    /**
+     * コンストラクタ
+     */
+    public SampleVariation() {
+    }
+
     @Override
     public String name() {
         return "sample";

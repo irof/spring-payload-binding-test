@@ -21,6 +21,12 @@ import java.util.UUID;
  */
 public final class SampleVariation implements Jackson3Variation {
 
+    /**
+     * コンストラクタ
+     */
+    public SampleVariation() {
+    }
+
     @Override
     public String name() {
         return "sample";
