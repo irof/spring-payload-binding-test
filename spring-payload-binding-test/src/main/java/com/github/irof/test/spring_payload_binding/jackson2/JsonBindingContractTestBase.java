@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.irof.test.spring_payload_binding.PayloadTestContext;
+import com.github.irof.test.spring_payload_binding.Variation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Jackson2 を使用した JSON バインディングコントラストテストの基底クラスです。
@@ -59,6 +61,18 @@ public abstract class JsonBindingContractTestBase extends com.github.irof.test.s
             }
         }
         return objectMapper;
+    }
+
+    /**
+     * 各ペイロードに対して実行するバリエーション群を返します。
+     * デフォルトは全ペイロードで SAMPLE, NULL, EMPTY です。
+     *
+     * @param ctx ペイロードのテストコンテキスト
+     * @return バリエーションのリスト
+     */
+    @Override
+    protected List<Variation> variations(PayloadTestContext ctx) {
+        return List.of(Jackson2Variation.SAMPLE, Jackson2Variation.NULL, Jackson2Variation.EMPTY);
     }
 
     @Override

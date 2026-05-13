@@ -36,14 +36,11 @@ public abstract class JsonBindingContractTestBase {
      * 各ペイロードに対して実行するバリエーション群を返します。
      * 型ごとに自由に組み替え可能です (NULL を受け付けない型はリストから外す、特定エンドポイントだけ
      * カスタムバリエーションを追加する、等)。
-     * デフォルトは全ペイロードで SAMPLE, NULL, EMPTY です。
      *
      * @param ctx ペイロードのテストコンテキスト
      * @return バリエーションのリスト
      */
-    protected List<Variation> variations(PayloadTestContext ctx) {
-        return List.of(Variation.SAMPLE, Variation.NULL, Variation.EMPTY);
-    }
+    protected abstract List<Variation> variations(PayloadTestContext ctx);
 
     /**
      * JSONファイルを格納するディレクトリのパスを返します。

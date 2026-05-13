@@ -46,6 +46,9 @@ class Jackson2PayloadTestContext implements PayloadTestContext {
 
     @Override
     public void runRoundTrip(Variation variation, Path jsonDirectory, boolean writeMissing) throws Exception {
+        if (!(variation instanceof Jackson2Variation j2variation)) {
+            throw new IllegalArgumentException("Jackson2PayloadTestContext requires Jackson2Variation, got: " + variation.getClass().getName());
+        }
         Path file = jsonDirectory
                 .resolve(payloadType.getRawClass().getName())
                 .resolve(variation.name() + ".json");
@@ -53,7 +56,7 @@ class Jackson2PayloadTestContext implements PayloadTestContext {
         String origin;
         boolean built = !Files.exists(file);
         if (built) {
-            source = variation.build(payloadType.type(), mapper);
+            source = j2variation.build(payloadType.type(), mapper);
             origin = "built";
         } else {
             source = mapper.readTree(file.toFile());
