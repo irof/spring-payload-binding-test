@@ -20,12 +20,15 @@ import java.util.List;
  * {@code com.github.irof.test.spring_payload_binding.jackson2.JsonBindingContractTestBase} または
  * {@code com.github.irof.test.spring_payload_binding.jackson3.JsonBindingContractTestBase} を継承してください。
  */
-public class JsonBindingContractTestBase {
+public abstract class JsonBindingContractTestBase {
 
     @Autowired
     @Qualifier("requestMappingHandlerMapping")
     private RequestMappingHandlerMapping handlerMapping;
 
+    /**
+     * MessageConverterの取得元となるHandlerAdapter
+     */
     @Autowired
     protected RequestMappingHandlerAdapter handlerAdapter;
 
@@ -37,7 +40,7 @@ public class JsonBindingContractTestBase {
      * @return テストコンテキストのコレクション
      */
     protected Collection<? extends PayloadTestContext> collectPayloadContexts(RequestMappingHandlerMapping handlerMapping) {
-        return detectProvider().collect(handlerMapping, handlerAdapter);
+        return detectProvider().collect(handlerMapping, handlerAdapter.getMessageConverters());
     }
 
     /**

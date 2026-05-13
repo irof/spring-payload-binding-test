@@ -1,9 +1,11 @@
 package com.github.irof.test.spring_payload_binding;
 
+import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Jackson バージョンごとのペイロードテストコンテキスト収集戦略です。
@@ -15,8 +17,8 @@ public interface JacksonContextProvider {
      * エンドポイントのペイロード型を収集してテストコンテキストを返します。
      *
      * @param mapping HandlerMapping
-     * @param adapter HandlerAdapter (ObjectMapper の取得に使用)
+     * @param messageConverters Mapperを保持しているConverterのコレクション
      * @return テストコンテキストのコレクション
      */
-    Collection<? extends PayloadTestContext> collect(RequestMappingHandlerMapping mapping, RequestMappingHandlerAdapter adapter);
+    Collection<? extends PayloadTestContext> collect(RequestMappingHandlerMapping mapping, List<HttpMessageConverter<?>> messageConverters);
 }

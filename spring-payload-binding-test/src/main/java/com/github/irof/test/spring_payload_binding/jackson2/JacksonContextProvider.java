@@ -8,11 +8,12 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.irof.test.spring_payload_binding.PayloadTestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Jackson2 を使用した {@link com.github.irof.test.spring_payload_binding.JacksonContextProvider} の実装です。
@@ -23,8 +24,8 @@ public class JacksonContextProvider implements com.github.irof.test.spring_paylo
 
     @SuppressWarnings("removal")
     @Override
-    public Collection<? extends PayloadTestContext> collect(RequestMappingHandlerMapping mapping, RequestMappingHandlerAdapter adapter) {
-        ObjectMapper mapper = adapter.getMessageConverters().stream()
+    public Collection<? extends PayloadTestContext> collect(RequestMappingHandlerMapping mapping, List<HttpMessageConverter<?>> messageConverters) {
+        ObjectMapper mapper = messageConverters.stream()
                 .filter(AbstractJackson2HttpMessageConverter.class::isInstance)
                 .map(AbstractJackson2HttpMessageConverter.class::cast)
                 .map(AbstractJackson2HttpMessageConverter::getObjectMapper)
