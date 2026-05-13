@@ -3,7 +3,6 @@
 Spring Bootのエンドポイントに使用される JSON バインディングを検証すテストツールです。
 
 Spring Boot 3.5.x(Jackson2) / 4.0.x(Jackson 2 & 3) で利用できます。
-このライブラリは Spring Boot BOM を利用者に強制しません。
 
 ## 仕組み
 
