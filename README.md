@@ -1,6 +1,6 @@
 # spring-payload-binding-test
 
-Spring Bootのエンドポイントに使用される JSON バインディングを検証すテストツールです。
+Spring Bootのエンドポイントに使用されるクラスに対して一律JSONバインディングのテストを行うツールです。
 
 Spring Boot 3.5.x(Jackson2) / 4.0.x(Jackson 2 & 3) で利用できます。
 
