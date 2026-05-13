@@ -7,10 +7,3 @@ dependencies {
 	compileOnly("org.springframework:spring-webmvc")
 	compileOnly("com.fasterxml.jackson.core:jackson-annotations")
 }
-
-sourceSets {
-	test {
-		java.setSrcDirs(emptyList<String>())
-		resources.setSrcDirs(emptyList<String>())
-	}
-}

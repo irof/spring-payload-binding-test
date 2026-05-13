@@ -10,7 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.util.List;
 
 @SpringBootTest
-class JsonBindingContractTest extends JsonBindingContractTestBase {
+class SpringBoot3JsonBindingContractTest extends JsonBindingContractTestBase {
 
     @Override
     protected List<Variation> variations(PayloadTestContext ctx) {
