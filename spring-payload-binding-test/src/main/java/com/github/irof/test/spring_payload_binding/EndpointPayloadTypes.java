@@ -24,6 +24,9 @@ public final class EndpointPayloadTypes {
      * @param endpoints この型を使用しているエンドポイントのリスト
      */
     public record PayloadType(JavaType type, List<String> endpoints) {
+        public Class<?> getRawClass() {
+            return type.getRawClass();
+        }
     }
 
     private EndpointPayloadTypes() {

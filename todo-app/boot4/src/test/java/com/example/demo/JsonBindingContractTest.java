@@ -5,6 +5,7 @@ import com.example.demo.todo.TodoStats;
 import com.github.irof.test.spring_payload_binding.EndpointPayloadTypes.PayloadType;
 import com.github.irof.test.spring_payload_binding.JsonBindingContractTestBase;
 import com.github.irof.test.spring_payload_binding.Variation;
+import org.junit.jupiter.api.Disabled;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
@@ -16,7 +17,7 @@ class JsonBindingContractTest extends JsonBindingContractTestBase {
     protected List<Variation> variations(PayloadType payload) {
         // primitive を含む型は NULL variation で round-trip できない
         // ({"x": null} → x=0 → serialize → {"x": 0} となり source と差が出る)
-        Class<?> raw = payload.type().getRawClass();
+        Class<?> raw = payload.getRawClass();
         if (raw == SearchResult.class || raw == TodoStats.class) {
             return List.of(Variation.SAMPLE, Variation.EMPTY);
         }

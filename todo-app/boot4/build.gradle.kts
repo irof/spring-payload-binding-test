@@ -4,14 +4,16 @@ plugins {
 }
 
 dependencies {
-	implementation(project(":todo-app:share")) {
-		exclude(module = "com.fasterxml.jackson.core:jackson-annotations")
-	}
+	implementation(project(":todo-app:share"))
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.springframework.boot:spring-boot-starter-json")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation(project(":spring-payload-binding-test"))
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+	// FIXME 現状はJackson2が必要
+	testRuntimeOnly("com.fasterxml.jackson.core:jackson-databind")
+	testRuntimeOnly("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 }
 
 sourceSets {
