@@ -145,17 +145,17 @@ public abstract class JsonBindingContractTestBase {
 
         log.info("[{}] {} ({})\n{}", variation.name(), payload.type().toCanonical(), origin, source.toPrettyString());
 
-        Object instance = mapper.readValue(sourceJson, payload.type());
-        String serialized = mapper.writeValueAsString(instance);
-        JsonNode normalizedSource = mapper.readTree(sourceJson);
-        JsonNode actual = mapper.readTree(serialized);
-        assertEquals(normalizedSource, actual, "round-trip JSON differs from source");
-
         if (built && writeMissingFiles()) {
             Files.createDirectories(file.getParent());
             mapper.writerWithDefaultPrettyPrinter().writeValue(file.toFile(), source);
             log.info("wrote fixture: {}", file);
         }
+
+        Object instance = mapper.readValue(sourceJson, payload.type());
+        String serialized = mapper.writeValueAsString(instance);
+        JsonNode normalizedSource = mapper.readTree(sourceJson);
+        JsonNode actual = mapper.readTree(serialized);
+        assertEquals(normalizedSource, actual, "round-trip JSON differs from source");
     }
 
     private Path fileFor(PayloadType payload, Variation variation) {
