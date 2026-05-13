@@ -10,16 +10,19 @@ SpringBoot4.0.x対応は対応と公開方法を検討中。
 ```mermaid
 flowchart TD
   subgraph Collection[1. 型の収集]
+    direction TD
     C1[RestControllerのRequest/Responseを収集]
   end
 
   subgraph Prepare[2. JSON準備]
+    direction TD
     E1["fixtureファイルが存在するか？"]
     E1 -- Yes --> E2-1[ファイルを読み込む]
     E1 -- No --> E2-2[Variation.build で生成する]
   end
 
   subgraph Execution[3. ラインドトリップテスト]
+    direction TD
     T1["JSON（IN） -> Java Object"]
     T2["Java Object -> JSON（OUT）"]
     TC{"JSON IN/OUT が等価か？"}
