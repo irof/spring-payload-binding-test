@@ -4,7 +4,9 @@ plugins {
 }
 
 dependencies {
-	implementation(project(":todo-app:share"))
+	implementation(project(":todo-app:share")) {
+		exclude(module = "com.fasterxml.jackson.core:jackson-annotations")
+	}
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.springframework.boot:spring-boot-starter-json")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")

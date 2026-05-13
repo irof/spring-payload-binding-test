@@ -3,9 +3,9 @@ plugins {
 }
 
 dependencies {
-	implementation(platform("org.springframework.boot:spring-boot-dependencies:3.5.14"))
-	api("org.springframework:spring-webmvc")
-	api("com.fasterxml.jackson.core:jackson-annotations")
+	compileOnly(platform("org.springframework.boot:spring-boot-dependencies:3.5.14"))
+	compileOnly("org.springframework:spring-webmvc")
+	compileOnly("com.fasterxml.jackson.core:jackson-annotations")
 }
 
 sourceSets {
