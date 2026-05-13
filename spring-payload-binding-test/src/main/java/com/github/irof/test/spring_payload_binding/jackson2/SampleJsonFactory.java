@@ -1,4 +1,4 @@
-package com.github.irof.test.spring_payload_binding;
+package com.github.irof.test.spring_payload_binding.jackson2;
 
 import com.fasterxml.jackson.databind.BeanDescription;
 import com.fasterxml.jackson.databind.JavaType;
@@ -22,11 +22,6 @@ public final class SampleJsonFactory {
 
     private final ObjectMapper mapper;
 
-    /**
-     * コンストラクタ。
-     *
-     * @param mapper 使用する ObjectMapper
-     */
     public SampleJsonFactory(ObjectMapper mapper) {
         this.mapper = mapper;
     }
