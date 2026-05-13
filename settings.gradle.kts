@@ -1,5 +1,6 @@
 rootProject.name = "spring-payload-binding-test"
 
 include("spring-payload-binding-test")
-include("todo-app")
-include("todo-app-boot4")
+include("todo-app:share")
+include("todo-app:boot3")
+include("todo-app:boot4")

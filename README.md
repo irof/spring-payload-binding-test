@@ -213,8 +213,9 @@ SLF4Jを使用したログを
 
 ### 利用例
 
-- `todo-app`: Spring Boot 3.5.x 用の利用例
-- `todo-app-boot4`: Spring Boot 4.0.x 用の利用例
+- `:todo-app:share`: Boot 3/4 共通のアプリ本体とテスト資産
+- `:todo-app:boot3`: Spring Boot 3.5.x 用の実行モジュール
+- `:todo-app:boot4`: Spring Boot 4.0.x 用の実行モジュール
 
 互換性確認:
 
@@ -223,10 +224,10 @@ SLF4Jを使用したログを
 ./gradlew :spring-payload-binding-test:test
 
 # Spring Boot 3.5.x サンプル
-./gradlew :todo-app:test
+./gradlew :todo-app:boot3:test
 
 # Spring Boot 4.0.x サンプル
-./gradlew :todo-app-boot4:test
+./gradlew :todo-app:boot4:test
 
 # 3/4 サンプルをまとめて実行
 ./gradlew testBootCompatibility
