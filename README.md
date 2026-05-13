@@ -29,7 +29,7 @@ flowchart TB
     T1 --> T2 --> TC
     TC -- NO --> T_error[Assertion Error]
     TC -- Yes --> TW{"fixtureファイルなし && writeMissingFiles"}
-    T_success["パス"]
+    T_success["Success"]
     TW -- NO --> T_success
     TW -- Yes --> T_write["ファイルを保存する"]
     T_write --> T_success
