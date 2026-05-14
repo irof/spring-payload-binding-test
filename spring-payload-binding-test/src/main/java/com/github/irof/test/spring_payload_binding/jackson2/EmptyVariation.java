@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.node.*;
 import com.github.irof.test.spring_payload_binding.PayloadTypeUtils;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -19,10 +20,23 @@ import java.util.Set;
  */
 public final class EmptyVariation implements Jackson2Variation {
 
+    private final Map<Class<?>, JsonNode> customValues;
+
     /**
-     * コンストラクタ
+     * カスタム値なしで動作するコンストラクタ。
      */
     public EmptyVariation() {
+        this(Map.of());
+    }
+
+    /**
+     * 型ごとのカスタム値を指定するコンストラクタ。
+     * 指定した型に対してはカスタム値が空値より優先されます。
+     *
+     * @param customValues 型からカスタム値へのマッピング
+     */
+    public EmptyVariation(Map<Class<?>, JsonNode> customValues) {
+        this.customValues = Map.copyOf(customValues);
     }
 
     @Override
@@ -38,6 +52,8 @@ public final class EmptyVariation implements Jackson2Variation {
     private JsonNode build(JavaType type, ObjectMapper objectMapper, Set<JavaType> path) {
         if (type.isReferenceType()) return build(type.getReferencedType(), objectMapper, path);
         Class<?> raw = type.getRawClass();
+        JsonNode custom = customValues.get(raw);
+        if (custom != null) return custom;
         JsonNode scalar = emptyScalar(raw);
         if (scalar != null) return scalar;
         if (type.isArrayType() || type.isCollectionLikeType()) return objectMapper.createArrayNode();

@@ -2,6 +2,8 @@ package com.github.irof.test.spring_payload_binding.jackson2;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.*;
+import com.github.irof.test.spring_payload_binding.CustomMappingVariation;
 import com.github.irof.test.spring_payload_binding.PayloadTestContext;
 import com.github.irof.test.spring_payload_binding.Variation;
 import com.github.irof.test.spring_payload_binding.jackson2.EndpointPayloadTypes.PayloadType;
@@ -10,7 +12,9 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -81,6 +85,15 @@ class Jackson2PayloadTestContext implements PayloadTestContext {
         if (variation instanceof Jackson2Variation j2v) {
             return j2v;
         }
+        if (variation instanceof CustomMappingVariation cmv) {
+            Map<Class<?>, JsonNode> map = toJsonNodeMap(cmv.customValues());
+            return switch (cmv.name()) {
+                case "sample" -> new SampleVariation(map);
+                case "null" -> new NullVariation(map);
+                case "empty" -> new EmptyVariation(map);
+                default -> throw new IllegalArgumentException("Unknown variation: " + cmv.name());
+            };
+        }
         return switch (variation.name()) {
             case "sample" -> Jackson2Variation.SAMPLE;
             case "null" -> Jackson2Variation.NULL;
@@ -88,5 +101,19 @@ class Jackson2PayloadTestContext implements PayloadTestContext {
             default -> throw new IllegalArgumentException(
                     "Unknown variation: " + variation.name() + ". Use Jackson2Variation or Variation.SAMPLE/NULL/EMPTY.");
         };
+    }
+
+    private static Map<Class<?>, JsonNode> toJsonNodeMap(Map<Class<?>, Object> values) {
+        Map<Class<?>, JsonNode> result = new LinkedHashMap<>();
+        for (var entry : values.entrySet()) {
+            result.put(entry.getKey(), switch (entry.getValue()) {
+                case String s -> TextNode.valueOf(s);
+                case Integer i -> IntNode.valueOf(i);
+                case Long l -> LongNode.valueOf(l);
+                case Boolean b -> BooleanNode.valueOf(b);
+                default -> throw new IllegalArgumentException("Unsupported value type: " + entry.getValue().getClass());
+            });
+        }
+        return result;
     }
 }

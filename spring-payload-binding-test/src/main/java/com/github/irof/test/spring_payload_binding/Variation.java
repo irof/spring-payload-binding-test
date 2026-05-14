@@ -1,5 +1,8 @@
 package com.github.irof.test.spring_payload_binding;
 
+import java.util.Map;
+import java.util.function.Consumer;
+
 /**
  * 1 つのペイロード型に対する JSON のバリエーションを生成するインタフェースです。
  * 利用側で実装すれば任意のバリエーション (例: "edge-case", "minimum") を追加できます。
@@ -15,6 +18,27 @@ public interface Variation {
      * @return バリエーション名
      */
     String name();
+
+    /**
+     * 型別カスタム値を持つバリエーションを生成します。
+     * このバリエーションは呼び出し元の {@link #name()} を引き継ぎます。
+     *
+     * @param configurer 型ごとのカスタム値を設定するコンシューマ
+     * @return カスタム値を持つバリエーション
+     */
+    default Variation customMapping(Consumer<TypeMapping> configurer) {
+        TypeMapping mapping = new TypeMapping();
+        configurer.accept(mapping);
+        Map<Class<?>, Object> values = mapping.build();
+        String baseName = this.name();
+        return new CustomMappingVariation() {
+            @Override
+            public String name() { return baseName; }
+
+            @Override
+            public Map<Class<?>, Object> customValues() { return values; }
+        };
+    }
 
     /**
      * 全フィールドにサンプル値を埋めるビルトインバリエーションです。
