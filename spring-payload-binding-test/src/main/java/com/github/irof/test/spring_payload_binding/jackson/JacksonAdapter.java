@@ -57,7 +57,7 @@ public interface JacksonAdapter<T, N> {
     /**
      * {@code @JsonValue} アノテーションが付いたアクセサーの型を返します。存在しない場合は空を返します。
      */
-    Optional<T> findJsonValueType(T type);
+    Optional<T> findJsonValueAnnotationType(T type);
 
     /**
      * シリアライズ対象のプロパティ一覧を返します。

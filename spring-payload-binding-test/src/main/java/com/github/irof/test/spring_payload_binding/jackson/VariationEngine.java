@@ -30,15 +30,24 @@ public final class VariationEngine<T, N> {
         return buildSampleInternal(type, new HashSet<>(), customValues);
     }
 
+    /**
+     * @param type         処理対象の型
+     * @param path         現在の経路で辿っている型を保持するコレクション
+     * @param customValues customMappingの設定内容
+     */
     private N buildSampleInternal(T type, Set<T> path, Map<Class<?>, N> customValues) {
         if (adapter.isReferenceType(type)) {
             return buildSampleInternal(adapter.referencedType(type), path, customValues);
         }
+
         Class<?> raw = adapter.rawClass(type);
+
         N custom = customValues.get(raw);
         if (custom != null) return custom;
+
         N scalar = sampleScalar(raw);
         if (scalar != null) return scalar;
+
         if (adapter.isCollectionLike(type)) {
             return adapter.arrayNode(List.of(buildSampleInternal(adapter.contentType(type), path, customValues)));
         }
@@ -49,17 +58,23 @@ public final class VariationEngine<T, N> {
             fields.put(adapter.nodeToText(keyNode), valueNode);
             return adapter.objectNode(fields);
         }
+
         if (PayloadTypeUtils.isFrameworkType(raw)) return adapter.nullNode();
+
+        // 同一経路内の無限再起を止める
         if (!path.add(type)) return adapter.nullNode();
+
         try {
-            Optional<T> jv = adapter.findJsonValueType(type);
-            if (jv.isPresent()) return buildSampleInternal(jv.get(), path, customValues);
+            Optional<T> jsonValueType = adapter.findJsonValueAnnotationType(type);
+            if (jsonValueType.isPresent()) return buildSampleInternal(jsonValueType.get(), path, customValues);
+
             Map<String, N> fields = new LinkedHashMap<>();
             for (var prop : adapter.findProperties(type)) {
                 fields.put(prop.name(), buildSampleInternal(prop.type(), path, customValues));
             }
             return adapter.objectNode(fields);
         } finally {
+            // 異なる経路（たとえば同じ型がフラットに並ぶ場合）は生成する必要があるのでremove
             path.remove(type);
         }
     }
@@ -95,7 +110,7 @@ public final class VariationEngine<T, N> {
     public N buildNull(T type, Map<Class<?>, N> customValues) {
         N custom = customValues.get(adapter.rawClass(type));
         if (custom != null) return custom;
-        Optional<T> jv = adapter.findJsonValueType(type);
+        Optional<T> jv = adapter.findJsonValueAnnotationType(type);
         if (jv.isPresent()) return adapter.nullNode();
         Map<String, N> fields = new LinkedHashMap<>();
         for (var prop : adapter.findProperties(type)) {
@@ -127,7 +142,7 @@ public final class VariationEngine<T, N> {
         if (PayloadTypeUtils.isFrameworkType(raw)) return adapter.nullNode();
         if (!path.add(type)) return adapter.nullNode();
         try {
-            Optional<T> jv = adapter.findJsonValueType(type);
+            Optional<T> jv = adapter.findJsonValueAnnotationType(type);
             if (jv.isPresent()) return buildEmptyInternal(jv.get(), path, customValues);
             Map<String, N> fields = new LinkedHashMap<>();
             for (var prop : adapter.findProperties(type)) {

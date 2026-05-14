@@ -83,7 +83,7 @@ final class Jackson3Adapter implements JacksonAdapter<JavaType, JsonNode> {
     }
 
     @Override
-    public Optional<JavaType> findJsonValueType(JavaType type) {
+    public Optional<JavaType> findJsonValueAnnotationType(JavaType type) {
         var ci = ci();
         var desc = ci.introspectForSerialization(type, ci.introspectClassAnnotations(type));
         var accessor = desc.findJsonValueAccessor();

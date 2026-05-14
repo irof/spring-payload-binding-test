@@ -76,7 +76,7 @@ final class Jackson2Adapter implements JacksonAdapter<JavaType, JsonNode> {
     }
 
     @Override
-    public Optional<JavaType> findJsonValueType(JavaType type) {
+    public Optional<JavaType> findJsonValueAnnotationType(JavaType type) {
         var desc = mapper.getSerializationConfig().introspect(type);
         var accessor = desc.findJsonValueAccessor();
         return accessor != null ? Optional.of(mapper.constructType(accessor.getType())) : Optional.empty();
