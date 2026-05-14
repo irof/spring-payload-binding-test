@@ -5,6 +5,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.*;
 import com.github.irof.test.spring_payload_binding.jackson.JacksonAdapter;
+import com.github.irof.test.spring_payload_binding.jackson.JsonIOAdapter;
+import com.github.irof.test.spring_payload_binding.jackson.NodeFactoryAdapter;
+import com.github.irof.test.spring_payload_binding.jackson.TypeIntrospectionAdapter;
+import com.github.irof.test.spring_payload_binding.jackson.TypeQueryAdapter;
 
 import java.io.File;
 import java.lang.reflect.Type;
@@ -12,7 +16,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-final class Jackson2Adapter implements JacksonAdapter<JavaType, JsonNode> {
+final class Jackson2Adapter implements
+        TypeQueryAdapter<JavaType>,
+        TypeIntrospectionAdapter<JavaType>,
+        NodeFactoryAdapter<JavaType, JsonNode>,
+        JsonIOAdapter<JavaType, JsonNode>,
+        JacksonAdapter<JavaType, JsonNode> {
 
     private final ObjectMapper mapper;
 
