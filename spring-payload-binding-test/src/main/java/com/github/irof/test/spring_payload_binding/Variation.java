@@ -7,7 +7,6 @@ import java.util.function.Consumer;
  * 1 つのペイロード型に対する JSON のバリエーションを生成するインタフェースです。
  * 利用側で実装すれば任意のバリエーション (例: "edge-case", "minimum") を追加できます。
  * ビルトイン定数 ({@link #SAMPLE}, {@link #NULL}, {@link #EMPTY}) は Jackson バージョンに依存せず使用できます。
- * Jackson バージョン依存の詳細な制御が必要な場合は各バージョンの Variation サブインタフェースを参照してください。
  */
 public interface Variation {
 

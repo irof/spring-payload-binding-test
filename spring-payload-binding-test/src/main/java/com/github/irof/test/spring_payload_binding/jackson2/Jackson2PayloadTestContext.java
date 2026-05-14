@@ -1,11 +1,12 @@
 package com.github.irof.test.spring_payload_binding.jackson2;
 
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.*;
 import com.github.irof.test.spring_payload_binding.CustomMappingVariation;
 import com.github.irof.test.spring_payload_binding.PayloadTestContext;
 import com.github.irof.test.spring_payload_binding.Variation;
+import com.github.irof.test.spring_payload_binding.VariationEngine;
 import com.github.irof.test.spring_payload_binding.jackson2.EndpointPayloadTypes.PayloadType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,10 +28,14 @@ class Jackson2PayloadTestContext implements PayloadTestContext {
 
     private final PayloadType payloadType;
     private final ObjectMapper mapper;
+    private final Jackson2VariationAdapter adapter;
+    private final VariationEngine<JavaType, JsonNode> engine;
 
     Jackson2PayloadTestContext(PayloadType payloadType, ObjectMapper mapper) {
         this.payloadType = payloadType;
         this.mapper = mapper;
+        this.adapter = new Jackson2VariationAdapter(mapper);
+        this.engine = new VariationEngine<>(adapter);
     }
 
     @Override
@@ -50,7 +55,6 @@ class Jackson2PayloadTestContext implements PayloadTestContext {
 
     @Override
     public void runRoundTrip(Variation variation, Path jsonDirectory, boolean writeMissing) throws Exception {
-        Jackson2Variation j2variation = resolveVariation(variation);
         Path file = jsonDirectory
                 .resolve(payloadType.getRawClass().getName())
                 .resolve(variation.name() + ".json");
@@ -58,7 +62,7 @@ class Jackson2PayloadTestContext implements PayloadTestContext {
         String origin;
         boolean built = !Files.exists(file);
         if (built) {
-            source = j2variation.build(payloadType.type(), mapper);
+            source = buildJson(variation);
             origin = "built";
         } else {
             source = mapper.readTree(file.toFile());
@@ -81,33 +85,25 @@ class Jackson2PayloadTestContext implements PayloadTestContext {
         assertEquals(normalizedSource, actual, "round-trip JSON differs from source");
     }
 
-    private static Jackson2Variation resolveVariation(Variation variation) {
-        if (variation instanceof Jackson2Variation j2v) {
-            return j2v;
-        }
-        if (variation instanceof CustomMappingVariation cmv) {
-            return new CustomMappingJackson2Variation(resolveVariation(cmv.base()), toJsonNodeMap(cmv.customValues()));
-        }
-        return switch (variation.name()) {
-            case "sample" -> Jackson2Variation.SAMPLE;
-            case "null" -> Jackson2Variation.NULL;
-            case "empty" -> Jackson2Variation.EMPTY;
+    private JsonNode buildJson(Variation variation) {
+        Map<Class<?>, JsonNode> customValues = resolveCustomValues(variation);
+        return switch (resolveBaseName(variation)) {
+            case "sample" -> engine.buildSample(payloadType.type(), customValues);
+            case "null"   -> engine.buildNull(payloadType.type(), customValues);
+            case "empty"  -> engine.buildEmpty(payloadType.type(), customValues);
             default -> throw new IllegalArgumentException(
-                    "Unknown variation: " + variation.name() + ". Use Jackson2Variation or Variation.SAMPLE/NULL/EMPTY.");
+                    "Unknown variation: " + variation.name() + ". Use Variation.SAMPLE/NULL/EMPTY.");
         };
     }
 
-    private static Map<Class<?>, JsonNode> toJsonNodeMap(Map<Class<?>, Object> values) {
+    private Map<Class<?>, JsonNode> resolveCustomValues(Variation variation) {
+        if (!(variation instanceof CustomMappingVariation cmv)) return Map.of();
         Map<Class<?>, JsonNode> result = new LinkedHashMap<>();
-        for (var entry : values.entrySet()) {
-            result.put(entry.getKey(), switch (entry.getValue()) {
-                case String s -> TextNode.valueOf(s);
-                case Integer i -> IntNode.valueOf(i);
-                case Long l -> LongNode.valueOf(l);
-                case Boolean b -> BooleanNode.valueOf(b);
-                default -> throw new IllegalArgumentException("Unsupported value type: " + entry.getValue().getClass());
-            });
-        }
+        cmv.customValues().forEach((k, v) -> result.put(k, adapter.primitiveToNode(v)));
         return result;
+    }
+
+    private static String resolveBaseName(Variation variation) {
+        return variation instanceof CustomMappingVariation cmv ? resolveBaseName(cmv.base()) : variation.name();
     }
 }
