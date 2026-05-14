@@ -1,6 +1,5 @@
 package com.github.irof.test.spring_payload_binding;
 
-import java.util.Map;
 import java.util.function.Consumer;
 
 /**
@@ -28,15 +27,7 @@ public interface Variation {
     default Variation customMapping(Consumer<TypeConfigurer> configurer) {
         TypeConfigurer mapping = new TypeConfigurer();
         configurer.accept(mapping);
-        Map<Class<?>, Object> values = mapping.build();
-        Variation self = this;
-        return new CustomMappingVariation() {
-            @Override
-            public Variation base() { return self; }
-
-            @Override
-            public Map<Class<?>, Object> customValues() { return values; }
-        };
+        return new CustomMappingVariation(this, mapping.build());
     }
 
     /**
