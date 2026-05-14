@@ -6,6 +6,21 @@ package com.github.irof.test.spring_payload_binding;
 public interface Variation {
 
     /**
+     * 全フィールドにサンプル値を埋めるビルトインバリエーションです。
+     */
+    EngineVariation SAMPLE = new SampleVariation();
+
+    /**
+     * 全フィールドを null にするビルトインバリエーションです。
+     */
+    EngineVariation NULL = new NullVariation();
+
+    /**
+     * 空/ゼロ値を埋めるビルトインバリエーションです。
+     */
+    EngineVariation EMPTY = new EmptyVariation();
+
+    /**
      * バリエーション名を返します。
      * ファイル名にも使われ、同じ payload 型内でユニークである必要があります。
      *

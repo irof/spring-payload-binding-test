@@ -2,7 +2,6 @@ package com.example.demo;
 
 import com.example.demo.todo.SearchResult;
 import com.example.demo.todo.TodoStats;
-import com.github.irof.test.spring_payload_binding.EngineVariation;
 import com.github.irof.test.spring_payload_binding.JsonBindingContractTestBase;
 import com.github.irof.test.spring_payload_binding.PayloadTestContext;
 import com.github.irof.test.spring_payload_binding.Variation;
@@ -19,7 +18,7 @@ class SpringBoot4JsonBindingContractTest extends JsonBindingContractTestBase {
         // ({"x": null} → x=0 → serialize → {"x": 0} となり source と差が出る)
         Class<?> raw = ctx.rawClass();
         if (raw == SearchResult.class || raw == TodoStats.class) {
-            return List.of(EngineVariation.SAMPLE, EngineVariation.EMPTY);
+            return List.of(Variation.SAMPLE, Variation.EMPTY);
         }
         return super.variations(ctx);
     }

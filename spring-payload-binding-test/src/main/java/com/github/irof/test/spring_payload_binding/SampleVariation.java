@@ -2,7 +2,7 @@ package com.github.irof.test.spring_payload_binding;
 
 /**
  * 全フィールドにサンプル値を埋めるビルトインバリエーションです。
- * {@link EngineVariation#SAMPLE} として提供されます。
+ * {@link Variation#SAMPLE} として提供されます。
  */
 public record SampleVariation() implements EngineVariation {
 
