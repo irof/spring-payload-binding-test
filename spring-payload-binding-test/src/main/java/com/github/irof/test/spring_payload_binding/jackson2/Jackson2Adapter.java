@@ -21,37 +21,59 @@ final class Jackson2Adapter implements JacksonAdapter<JavaType, JsonNode> {
     }
 
     @Override
-    public boolean isReferenceType(JavaType type) { return type.isReferenceType(); }
+    public boolean isReferenceType(JavaType type) {
+        return type.isReferenceType();
+    }
 
     @Override
-    public JavaType referencedType(JavaType type) { return type.getReferencedType(); }
+    public JavaType referencedType(JavaType type) {
+        return type.getReferencedType();
+    }
 
     @Override
-    public boolean isCollectionLike(JavaType type) { return type.isArrayType() || type.isCollectionLikeType(); }
+    public boolean isCollectionLike(JavaType type) {
+        return type.isArrayType() || type.isCollectionLikeType();
+    }
 
     @Override
-    public JavaType contentType(JavaType type) { return type.getContentType(); }
+    public JavaType contentType(JavaType type) {
+        return type.getContentType();
+    }
 
     @Override
-    public boolean isMapLike(JavaType type) { return type.isMapLikeType(); }
+    public boolean isMapLike(JavaType type) {
+        return type.isMapLikeType();
+    }
 
     @Override
-    public JavaType keyType(JavaType type) { return type.getKeyType(); }
+    public JavaType keyType(JavaType type) {
+        return type.getKeyType();
+    }
 
     @Override
-    public Class<?> rawClass(JavaType type) { return type.getRawClass(); }
+    public Class<?> rawClass(JavaType type) {
+        return type.getRawClass();
+    }
 
     @Override
-    public boolean isContainerType(JavaType type) { return type.isContainerType(); }
+    public boolean isContainerType(JavaType type) {
+        return type.isContainerType();
+    }
 
     @Override
-    public JavaType constructType(Type type) { return mapper.constructType(type); }
+    public JavaType constructType(Type type) {
+        return mapper.constructType(type);
+    }
 
     @Override
-    public JavaType containedTypeOrUnknown(JavaType type, int index) { return type.containedTypeOrUnknown(index); }
+    public JavaType containedTypeOrUnknown(JavaType type, int index) {
+        return type.containedTypeOrUnknown(index);
+    }
 
     @Override
-    public String toCanonical(JavaType type) { return type.toCanonical(); }
+    public String toCanonical(JavaType type) {
+        return type.toCanonical();
+    }
 
     @Override
     public Optional<JavaType> findJsonValueType(JavaType type) {
@@ -69,25 +91,39 @@ final class Jackson2Adapter implements JacksonAdapter<JavaType, JsonNode> {
     }
 
     @Override
-    public JsonNode nullNode() { return NullNode.instance; }
+    public JsonNode nullNode() {
+        return NullNode.instance;
+    }
 
     @Override
-    public JsonNode stringNode(String value) { return TextNode.valueOf(value); }
+    public JsonNode stringNode(String value) {
+        return TextNode.valueOf(value);
+    }
 
     @Override
-    public JsonNode intNode(int value) { return IntNode.valueOf(value); }
+    public JsonNode intNode(int value) {
+        return IntNode.valueOf(value);
+    }
 
     @Override
-    public JsonNode longNode(long value) { return LongNode.valueOf(value); }
+    public JsonNode longNode(long value) {
+        return LongNode.valueOf(value);
+    }
 
     @Override
-    public JsonNode boolNode(boolean value) { return BooleanNode.valueOf(value); }
+    public JsonNode boolNode(boolean value) {
+        return BooleanNode.valueOf(value);
+    }
 
     @Override
-    public JsonNode floatNode(float value) { return FloatNode.valueOf(value); }
+    public JsonNode floatNode(float value) {
+        return FloatNode.valueOf(value);
+    }
 
     @Override
-    public JsonNode doubleNode(double value) { return DoubleNode.valueOf(value); }
+    public JsonNode doubleNode(double value) {
+        return DoubleNode.valueOf(value);
+    }
 
     @Override
     public JsonNode objectNode(Map<String, JsonNode> fields) {
@@ -104,7 +140,9 @@ final class Jackson2Adapter implements JacksonAdapter<JavaType, JsonNode> {
     }
 
     @Override
-    public String nodeToText(JsonNode node) { return node.asText(); }
+    public String nodeToText(JsonNode node) {
+        return node.asText();
+    }
 
     @Override
     public JsonNode primitiveToNode(Object value) {
@@ -138,11 +176,12 @@ final class Jackson2Adapter implements JacksonAdapter<JavaType, JsonNode> {
     }
 
     @Override
-    @SuppressWarnings("removal")
     public void writePrettyValue(File file, JsonNode value) throws Exception {
         mapper.writerWithDefaultPrettyPrinter().writeValue(file, value);
     }
 
     @Override
-    public String toPrettyString(JsonNode node) { return node.toPrettyString(); }
+    public String toPrettyString(JsonNode node) {
+        return node.toPrettyString();
+    }
 }
