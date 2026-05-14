@@ -1,12 +1,6 @@
 package com.github.irof.test.spring_payload_binding.jackson;
 
-import com.github.irof.test.spring_payload_binding.CustomMappingVariation;
-import com.github.irof.test.spring_payload_binding.EmptyVariation;
-import com.github.irof.test.spring_payload_binding.EngineVariation;
-import com.github.irof.test.spring_payload_binding.NullVariation;
-import com.github.irof.test.spring_payload_binding.PayloadTestContext;
-import com.github.irof.test.spring_payload_binding.SampleVariation;
-import com.github.irof.test.spring_payload_binding.Variation;
+import com.github.irof.test.spring_payload_binding.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

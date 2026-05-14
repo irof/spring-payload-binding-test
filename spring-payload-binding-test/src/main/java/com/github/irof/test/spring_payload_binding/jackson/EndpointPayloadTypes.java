@@ -21,9 +21,11 @@ public final class EndpointPayloadTypes {
      * @param rawClass  ペイロードの raw クラス
      * @param endpoints この型を使用しているエンドポイントのリスト
      */
-    public record PayloadType<T>(T type, Class<?> rawClass, List<String> endpoints) {}
+    public record PayloadType<T>(T type, Class<?> rawClass, List<String> endpoints) {
+    }
 
-    private EndpointPayloadTypes() {}
+    private EndpointPayloadTypes() {
+    }
 
     /**
      * RequestMappingHandlerMapping からエンドポイントのペイロード型を収集します。
