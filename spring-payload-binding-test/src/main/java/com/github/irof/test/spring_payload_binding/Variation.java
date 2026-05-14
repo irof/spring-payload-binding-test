@@ -2,7 +2,6 @@ package com.github.irof.test.spring_payload_binding;
 
 /**
  * 1 つのペイロード型に対する JSON のバリエーションを表すインタフェースです。
- * エンジン駆動の場合は {@link EngineVariation}、完全カスタムの場合は {@link GenerativeVariation} を使用します。
  */
 public interface Variation {
 
