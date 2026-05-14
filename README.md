@@ -52,7 +52,7 @@ Gradle (`build.gradle.kts`):
 
 ```kotlin
 dependencies {
-    testImplementation("com.github.irof:spring-payload-binding-test:0.0.1")
+    testImplementation("com.github.irof:spring-payload-binding-test:0.0.2")
 }
 ```
 
@@ -63,7 +63,7 @@ Maven (`pom.xml`):
     <dependency>
         <groupId>com.github.irof</groupId>
         <artifactId>spring-payload-binding-test</artifactId>
-        <version>0.0.1</version>
+        <version>0.0.2</version>
         <scope>test</scope>
     </dependency>
 </dependencies>
@@ -107,9 +107,9 @@ class JsonBindingContractTest extends JsonBindingContractTestBase {
 
 | バリエーション | 生成される JSON | 目的 |
 |---|---|---|
-| `EngineVariation.SAMPLE` | 全フィールドにサンプル値（"sample", `1`, enum 第一定数 等） | 通常経路のバインディング検査 |
-| `EngineVariation.NULL` | 全フィールド `null` の object (`@JsonValue` 型は top-level `null`) | null 受容性の検査 |
-| `EngineVariation.EMPTY` | 空/ゼロ値 (String→`""`, コレクション→`[]`, primitive→デフォルト値, ネスト object は再帰的に empty) | 空値・初期値の受容性検査 |
+| `Variation.SAMPLE` | 全フィールドにサンプル値（"sample", `1`, enum 第一定数 等） | 通常経路のバインディング検査 |
+| `Variation.NULL` | 全フィールド `null` の object (`@JsonValue` 型は top-level `null`) | null 受容性の検査 |
+| `Variation.EMPTY` | 空/ゼロ値 (String→`""`, コレクション→`[]`, primitive→デフォルト値, ネスト object は再帰的に empty) | 空値・初期値の受容性検査 |
 
 ##### SAMPLEで生成される値
 
@@ -136,22 +136,21 @@ class JsonBindingContractTest extends JsonBindingContractTestBase {
 
 ```java
 // UUID 型だけ固定値を指定
-EngineVariation.SAMPLE.customMapping(cfg -> cfg.type(UUID.class, "11111111-1111-1111-1111-111111111111"))
+Variation.SAMPLE.customMapping(configure -> configure.type(UUID.class, "11111111-1111-1111-1111-111111111111"))
 
 // Supplier で動的に値を生成（テスト実行ごとに異なる UUID など）
-EngineVariation.SAMPLE.customMapping(cfg -> cfg.type(UUID.class, UUID::randomUUID))
+Variation.SAMPLE.customMapping(configure -> configure.type(UUID.class, UUID::randomUUID))
 ```
 
-##### 名前を変えた派生バリエーション (`withName`)
+##### 名前を変えた派生バリエーション
 
-同一ペイロードに SAMPLE ベースの複数バリエーションを定義したい場合、`withName` で別名を付けます。
+バリエーションの名前は一意である必要があります。
+SAMPLEをベースにした複数のバリエーションを作成する場合は次のようにします。
 
 ```java
-// 名前だけ変える
-EngineVariation.SAMPLE.withName("scenario-a")
 
 // 名前 + カスタム値を同時に指定
-EngineVariation.SAMPLE.customMapping("scenario-b", cfg -> cfg.type(String.class, "custom"))
+Variation.SAMPLE.customMapping("scenario-b", configure -> configure.type(String.class, "custom"))
 ```
 
 各バリエーションの `name()` がファイル名（`{name}.json`）に使われます。
@@ -163,20 +162,23 @@ EngineVariation.SAMPLE.customMapping("scenario-b", cfg -> cfg.type(String.class,
 ```java
 @SpringBootTest
 class JsonBindingContractTest extends JsonBindingContractTestBase {
+    
     @Override
-    protected List<Variation> variations(PayloadTestContext ctx) {
+    protected List<Variation> variations(PayloadTestContext payloadTestContext) {
         Class<?> raw = ctx.rawClass();
-        // primitive を含む型は NULL variation で round-trip 不可なので除外
-        if (raw == SearchResult.class || raw == TodoStats.class) {
-            return List.of(EngineVariation.SAMPLE, EngineVariation.EMPTY);
+        // ペイロードによって使用するバリエーションを変える
+        if (payloadTestContext == SearchResult.class || raw == TodoStats.class) {
+            return List.of(Variation.SAMPLE, Variation.EMPTY);
         }
-        // 特定の型だけ派生バリエーションを足すこともできる
+        // カスタマイズしたバリエーションを追加することもできる
         if (raw == TodoList.class) {
             return List.of(
-                EngineVariation.SAMPLE,
-                EngineVariation.SAMPLE.withName("scenario-a"),
-                EngineVariation.NULL,
-                EngineVariation.EMPTY
+                    Variation.SAMPLE,
+                    Variation.SAMPLE.customMapping("scenario-hoge", configure -> configure
+                            .type(String.class, "hoge")
+                            .type(TodoList.Priority.class, "MEDIUM")),
+                    Variation.NULL,
+                    Variation.EMPTY
             );
         }
         return super.variations(ctx);

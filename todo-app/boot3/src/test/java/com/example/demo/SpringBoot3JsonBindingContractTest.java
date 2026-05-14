@@ -1,6 +1,7 @@
 package com.example.demo;
 
 import com.example.demo.todo.SearchResult;
+import com.example.demo.todo.TodoList;
 import com.example.demo.todo.TodoStats;
 import com.github.irof.test.spring_payload_binding.JsonBindingContractTestBase;
 import com.github.irof.test.spring_payload_binding.PayloadTestContext;
@@ -20,6 +21,18 @@ class SpringBoot3JsonBindingContractTest extends JsonBindingContractTestBase {
         if (raw == SearchResult.class || raw == TodoStats.class) {
             return List.of(Variation.SAMPLE, Variation.EMPTY);
         }
+
+        if (raw == TodoList.class) {
+            return List.of(
+                Variation.SAMPLE,
+                Variation.SAMPLE.customMapping("scenario-hoge", configure -> configure
+                        .type(String.class, "hoge")
+                        .type(TodoList.Priority.class, "MEDIUM")),
+                Variation.NULL,
+                Variation.EMPTY
+            );
+        }
+
         return super.variations(payloadTestContext);
     }
 }

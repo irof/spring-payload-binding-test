@@ -1,6 +1,6 @@
 allprojects {
 	group = "com.github.irof"
-	version = "0.0.2-SNAPSHOT"
+	version = "0.0.2"
 
 	repositories {
 		mavenCentral()
