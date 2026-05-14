@@ -19,6 +19,8 @@ public interface JacksonContextProvider {
      * 使用するJacksonを判別します。
      *
      * Jacksonは2/3混在可能ですが、3が存在する場合は3を決め打ちで使用します。
+     *
+     * @return JacksonContextProvider
      */
     static JacksonContextProvider detectProvider() {
         try {
