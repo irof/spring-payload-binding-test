@@ -12,4 +12,14 @@ public interface Variation {
      * @return バリエーション名
      */
     String name();
+
+    /**
+     * バリエーション名を指定して Variation インスタンスを生成します。
+     *
+     * @param name バリエーション名
+     * @return Variation インスタンス
+     */
+    static Variation of(String name) {
+        return () -> name;
+    }
 }
