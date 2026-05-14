@@ -17,7 +17,7 @@ flowchart TB
     direction TB
     E1["fixtureファイルが存在するか？"]
     E1 -- Yes --> E2-1[ファイルを読み込む]
-    E1 -- No --> E2-2[Variation.build で生成する]
+    E1 -- No --> E2-2[エンジンで生成する]
   end
 
   subgraph Execution[3. ラインドトリップテスト]
@@ -107,13 +107,13 @@ class JsonBindingContractTest extends JsonBindingContractTestBase {
 
 | バリエーション | 生成される JSON | 目的 |
 |---|---|---|
-| `Variation.SAMPLE` | 全フィールドにサンプル値（"sample", `1`, enum 第一定数 等） | 通常経路のバインディング検査 |
-| `Variation.NULL` | 全フィールド `null` の object (`@JsonValue` 型は top-level `null`) | null 受容性の検査 |
-| `Variation.EMPTY` | 空/ゼロ値 (String→`""`, コレクション→`[]`, primitive→デフォルト値, ネスト object は再帰的に empty) | 空値・初期値の受容性検査 |
+| `EngineVariation.SAMPLE` | 全フィールドにサンプル値（"sample", `1`, enum 第一定数 等） | 通常経路のバインディング検査 |
+| `EngineVariation.NULL` | 全フィールド `null` の object (`@JsonValue` 型は top-level `null`) | null 受容性の検査 |
+| `EngineVariation.EMPTY` | 空/ゼロ値 (String→`""`, コレクション→`[]`, primitive→デフォルト値, ネスト object は再帰的に empty) | 空値・初期値の受容性検査 |
 
 ##### SAMPLEで生成される値
 
-`SampleJsonFactory` が `JavaType` から再帰的に `JsonNode` を構築する。
+`VariationEngine` が `JavaType` から再帰的に `JsonNode` を構築する。
 
 - スカラー:
     - `String→"sample"`
@@ -126,38 +126,60 @@ class JsonBindingContractTest extends JsonBindingContractTestBase {
 - Bean / record: `BeanDescription` の serializationConfig 由来 property を全て埋める
 - 循環参照: `path` Set で検出して `NullNode`
 
-#### カスタムバリエーション
+#### バリエーションのカスタマイズ
 
-`Variation` インタフェースを実装すれば任意のバリエーション (境界値、最小値のみ、特定エラーケース等) を追加できる:
+`EngineVariation` のメソッドで既存バリエーションをベースに派生させることができます。
+
+##### 型ごとの値の上書き (`customMapping`)
+
+特定の型に対して固定値または動的な値を指定したバリエーションを作成します。
 
 ```java
-class MinimumValuesVariation implements Variation {
-    public String name() { return "minimum"; }
-    public JsonNode build(JavaType type, ObjectMapper mapper) {
-        // ... カスタムロジック
-    }
-}
+// UUID 型だけ固定値を指定
+EngineVariation.SAMPLE.customMapping(cfg -> cfg.type(UUID.class, "11111111-1111-1111-1111-111111111111"))
+
+// Supplier で動的に値を生成（テスト実行ごとに異なる UUID など）
+EngineVariation.SAMPLE.customMapping(cfg -> cfg.type(UUID.class, UUID::randomUUID))
 ```
+
+##### 名前を変えた派生バリエーション (`withName`)
+
+同一ペイロードに SAMPLE ベースの複数バリエーションを定義したい場合、`withName` で別名を付けます。
+
+```java
+// 名前だけ変える
+EngineVariation.SAMPLE.withName("scenario-a")
+
+// 名前 + カスタム値を同時に指定
+EngineVariation.SAMPLE.customMapping("scenario-b", cfg -> cfg.type(String.class, "custom"))
+```
+
+各バリエーションの `name()` がファイル名（`{name}.json`）に使われます。
 
 #### 応用: 型ごとのバリエーション指定
 
-`variations(PayloadType)` を override し、各ペイロードに対して実行するバリエーション群を返す。型ごとに自由に組み替え可能 (NULL を受け付けない型はリストから外す、特定型だけカスタムバリエーションを追加する、等)。
+`variations(PayloadTestContext)` を override し、各ペイロードに対して実行するバリエーション群を返す。型ごとに自由に組み替え可能 (NULL を受け付けない型はリストから外す、特定型だけカスタムバリエーションを追加する、等)。
 
 ```java
 @SpringBootTest
 class JsonBindingContractTest extends JsonBindingContractTestBase {
     @Override
-    protected List<Variation> variations(PayloadType payload) {
-        Class<?> raw = payload.type().getRawClass();
+    protected List<Variation> variations(PayloadTestContext ctx) {
+        Class<?> raw = ctx.rawClass();
         // primitive を含む型は NULL variation で round-trip 不可なので除外
         if (raw == SearchResult.class || raw == TodoStats.class) {
-            return List.of(Variation.SAMPLE);
+            return List.of(EngineVariation.SAMPLE, EngineVariation.EMPTY);
         }
-        // 特定の型だけカスタムバリエーションを足すこともできる
+        // 特定の型だけ派生バリエーションを足すこともできる
         if (raw == TodoList.class) {
-            return List.of(Variation.SAMPLE, Variation.NULL, new MinimumValuesVariation());
+            return List.of(
+                EngineVariation.SAMPLE,
+                EngineVariation.SAMPLE.withName("scenario-a"),
+                EngineVariation.NULL,
+                EngineVariation.EMPTY
+            );
         }
-        return super.variations(payload);
+        return super.variations(ctx);
     }
 }
 ```
@@ -167,7 +189,7 @@ class JsonBindingContractTest extends JsonBindingContractTestBase {
 変換するJSON（fixture JSON）は固定と動的生成に対応しており、各型とバリエーションの組み合わせで `src/test/resources/json-binding/{FQN}/{variation}.json` の有無で動作が自動切替されます。
 
 - **ファイルあり**: そのファイルの JSON を source として読み込みラウンドトリップ検査
-- **ファイルなし**: `Variation.build()` でその場生成してラウンドトリップ検査
+- **ファイルなし**: エンジンでその場生成してラウンドトリップ検査
 
 ファイルがなくても「とりあえずJSONと変換できる」は確認できます。簡易確認用です。
 
@@ -201,7 +223,7 @@ rm -r src/test/resources/json-binding && ./gradlew test -Djson.binding.write=tru
 }
 ```
 
-SLF4Jを使用したログを
+SLF4Jを使用したログを出力します。
 
 ### 検査対象の絞り込み
 
