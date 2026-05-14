@@ -1,6 +1,8 @@
 package com.github.irof.test.spring_payload_binding.jackson;
 
-import com.github.irof.test.spring_payload_binding.*;
+import com.github.irof.test.spring_payload_binding.CustomMappingVariation;
+import com.github.irof.test.spring_payload_binding.PayloadTestContext;
+import com.github.irof.test.spring_payload_binding.Variation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,18 +82,15 @@ public final class PayloadTestContextImpl<T, N> implements PayloadTestContext {
         assertEquals(normalizedSource, actual, "round-trip JSON differs from source");
     }
 
-    private N buildJson(Variation variation) throws Exception {
-        if (variation instanceof GenerativeVariation gv) {
-            return adapter.readTree(gv.buildJson(payloadType.rawClass()));
-        }
+    private N buildJson(Variation variation) {
         Map<Class<?>, N> customValues = resolveCustomValues(variation);
         return switch (variation.name()) {
             case "sample" -> engine.buildSample(payloadType.type(), customValues);
-            case "null"   -> engine.buildNull(payloadType.type(), customValues);
-            case "empty"  -> engine.buildEmpty(payloadType.type(), customValues);
+            case "null" -> engine.buildNull(payloadType.type(), customValues);
+            case "empty" -> engine.buildEmpty(payloadType.type(), customValues);
             default -> throw new IllegalArgumentException(
                     "Unknown variation: " + variation.name()
-                    + ". Use EngineVariation.SAMPLE/NULL/EMPTY or implement GenerativeVariation.");
+                            + ". Use EngineVariation.SAMPLE/NULL/EMPTY or implement GenerativeVariation.");
         };
     }
 
