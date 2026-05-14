@@ -18,6 +18,9 @@ flowchart TB
     E1["fixtureファイルが存在するか？"]
     E1 -- Yes --> E2-1[ファイルを読み込む]
     E1 -- No --> E2-2[エンジンで生成する]
+
+    E2-2 --> EW{"writeMissingFiles"}
+    EW -- Yes --> T_write["ファイルを保存する"]
   end
 
   subgraph Execution[3. ラインドトリップテスト]
@@ -27,11 +30,8 @@ flowchart TB
     TC{"JSON IN/OUT が等価か？"}
     T1 --> T2 --> TC
     TC -- NO --> T_error[Assertion Error]
-    TC -- Yes --> TW{"fixtureファイルなし && writeMissingFiles"}
+    TC -- Yes --> T_success
     T_success["Success"]
-    TW -- NO --> T_success
-    TW -- Yes --> T_write["ファイルを保存する"]
-    T_write --> T_success
   end
 
   Collection --> Prepare
