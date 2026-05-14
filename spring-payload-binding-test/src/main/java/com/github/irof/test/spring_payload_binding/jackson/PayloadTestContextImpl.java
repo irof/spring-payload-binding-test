@@ -1,7 +1,11 @@
 package com.github.irof.test.spring_payload_binding.jackson;
 
 import com.github.irof.test.spring_payload_binding.CustomMappingVariation;
+import com.github.irof.test.spring_payload_binding.EmptyVariation;
+import com.github.irof.test.spring_payload_binding.EngineVariation;
+import com.github.irof.test.spring_payload_binding.NullVariation;
 import com.github.irof.test.spring_payload_binding.PayloadTestContext;
+import com.github.irof.test.spring_payload_binding.SampleVariation;
 import com.github.irof.test.spring_payload_binding.Variation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,14 +88,18 @@ public final class PayloadTestContextImpl<T, N> implements PayloadTestContext {
 
     private N buildJson(Variation variation) {
         Map<Class<?>, N> customValues = resolveCustomValues(variation);
-        return switch (variation.name()) {
-            case "sample" -> engine.buildSample(payloadType.type(), customValues);
-            case "null" -> engine.buildNull(payloadType.type(), customValues);
-            case "empty" -> engine.buildEmpty(payloadType.type(), customValues);
-            default -> throw new IllegalArgumentException(
-                    "Unknown variation: " + variation.name()
-                            + ". Use EngineVariation.SAMPLE/NULL/EMPTY or implement GenerativeVariation.");
-        };
+        EngineVariation base = resolveBase(variation);
+        if (base instanceof SampleVariation) return engine.buildSample(payloadType.type(), customValues);
+        if (base instanceof NullVariation) return engine.buildNull(payloadType.type(), customValues);
+        if (base instanceof EmptyVariation) return engine.buildEmpty(payloadType.type(), customValues);
+        throw new IllegalArgumentException("Unknown EngineVariation: " + base.getClass().getName());
+    }
+
+    private EngineVariation resolveBase(Variation variation) {
+        if (variation instanceof CustomMappingVariation cmv) {
+            return resolveBase(cmv.base());
+        }
+        return (EngineVariation) variation;
     }
 
     private Map<Class<?>, N> resolveCustomValues(Variation variation) {

@@ -6,11 +6,6 @@ import java.util.Map;
  * 型別カスタム値を持つバリエーションです。
  * {@link EngineVariation#customMapping} で生成されます。
  */
-public record CustomMappingVariation(EngineVariation base, Map<Class<?>, Object> customValues)
+public record CustomMappingVariation(String name, EngineVariation base, Map<Class<?>, Object> customValues)
         implements EngineVariation {
-
-    @Override
-    public String name() {
-        return base.name();
-    }
 }
