@@ -1,6 +1,6 @@
 package com.github.irof.test.spring_payload_binding.jackson;
 
-import com.github.irof.test.spring_payload_binding.TypeMapping;
+import com.github.irof.test.spring_payload_binding.TypeConfigurer;
 
 import java.io.File;
 import java.lang.reflect.Type;
@@ -93,7 +93,7 @@ public interface JacksonAdapter<T, N> {
     String nodeToText(N node);
 
     /**
-     * {@link TypeMapping} の値（String/Integer/Long/Boolean）を N に変換します。
+     * {@link TypeConfigurer} の値（String/Integer/Long/Boolean）を N に変換します。
      */
     N primitiveToNode(Object value);
 

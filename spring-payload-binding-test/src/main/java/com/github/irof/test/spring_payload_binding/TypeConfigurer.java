@@ -7,11 +7,11 @@ import java.util.Map;
  * 型ごとのカスタム値を設定するビルダーです。
  * {@link Variation#customMapping} のコンシューマ引数として使用します。
  */
-public final class TypeMapping {
+public final class TypeConfigurer {
 
     private final Map<Class<?>, Object> values = new LinkedHashMap<>();
 
-    TypeMapping() {
+    TypeConfigurer() {
     }
 
     /**
@@ -21,7 +21,7 @@ public final class TypeMapping {
      * @param value サンプル値
      * @return このインスタンス
      */
-    public TypeMapping type(Class<?> type, String value) {
+    public TypeConfigurer type(Class<?> type, String value) {
         values.put(type, value);
         return this;
     }
@@ -33,7 +33,7 @@ public final class TypeMapping {
      * @param value サンプル値
      * @return このインスタンス
      */
-    public TypeMapping type(Class<?> type, int value) {
+    public TypeConfigurer type(Class<?> type, int value) {
         values.put(type, value);
         return this;
     }
@@ -45,7 +45,7 @@ public final class TypeMapping {
      * @param value サンプル値
      * @return このインスタンス
      */
-    public TypeMapping type(Class<?> type, long value) {
+    public TypeConfigurer type(Class<?> type, long value) {
         values.put(type, value);
         return this;
     }
@@ -57,7 +57,7 @@ public final class TypeMapping {
      * @param value サンプル値
      * @return このインスタンス
      */
-    public TypeMapping type(Class<?> type, boolean value) {
+    public TypeConfigurer type(Class<?> type, boolean value) {
         values.put(type, value);
         return this;
     }

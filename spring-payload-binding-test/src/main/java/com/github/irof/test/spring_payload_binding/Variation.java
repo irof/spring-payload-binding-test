@@ -25,8 +25,8 @@ public interface Variation {
      * @param configurer 型ごとのカスタム値を設定するコンシューマ
      * @return カスタム値を持つバリエーション
      */
-    default Variation customMapping(Consumer<TypeMapping> configurer) {
-        TypeMapping mapping = new TypeMapping();
+    default Variation customMapping(Consumer<TypeConfigurer> configurer) {
+        TypeConfigurer mapping = new TypeConfigurer();
         configurer.accept(mapping);
         Map<Class<?>, Object> values = mapping.build();
         Variation self = this;
