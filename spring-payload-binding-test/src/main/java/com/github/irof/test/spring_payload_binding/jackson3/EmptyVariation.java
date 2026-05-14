@@ -20,23 +20,10 @@ import java.util.Set;
  */
 public final class EmptyVariation implements Jackson3Variation {
 
-    private final Map<Class<?>, JsonNode> customValues;
-
     /**
-     * カスタム値なしで動作するコンストラクタ。
+     * コンストラクタ
      */
     public EmptyVariation() {
-        this(Map.of());
-    }
-
-    /**
-     * 型ごとのカスタム値を指定するコンストラクタ。
-     * 指定した型に対してはカスタム値が空値より優先されます。
-     *
-     * @param customValues 型からカスタム値へのマッピング
-     */
-    public EmptyVariation(Map<Class<?>, JsonNode> customValues) {
-        this.customValues = Map.copyOf(customValues);
     }
 
     @Override
@@ -46,12 +33,17 @@ public final class EmptyVariation implements Jackson3Variation {
 
     @Override
     public JsonNode build(JavaType type, ObjectMapper mapper) {
-        ClassIntrospector ci = mapper.serializationConfig().classIntrospectorInstance();
-        return build(type, mapper, new HashSet<>(), ci);
+        return buildWithCustomValues(type, mapper, Map.of());
     }
 
-    private JsonNode build(JavaType type, ObjectMapper mapper, Set<JavaType> path, ClassIntrospector ci) {
-        if (type.isReferenceType()) return build(type.getReferencedType(), mapper, path, ci);
+    @Override
+    public JsonNode buildWithCustomValues(JavaType type, ObjectMapper mapper, Map<Class<?>, JsonNode> customValues) {
+        ClassIntrospector ci = mapper.serializationConfig().classIntrospectorInstance();
+        return build(type, mapper, new HashSet<>(), ci, customValues);
+    }
+
+    private JsonNode build(JavaType type, ObjectMapper mapper, Set<JavaType> path, ClassIntrospector ci, Map<Class<?>, JsonNode> customValues) {
+        if (type.isReferenceType()) return build(type.getReferencedType(), mapper, path, ci, customValues);
         Class<?> raw = type.getRawClass();
         JsonNode custom = customValues.get(raw);
         if (custom != null) return custom;
@@ -65,11 +57,11 @@ public final class EmptyVariation implements Jackson3Variation {
             var desc = ci.introspectForSerialization(type, ci.introspectClassAnnotations(type));
             AnnotatedMember jsonValue = desc.findJsonValueAccessor();
             if (jsonValue != null) {
-                return build(jsonValue.getType(), mapper, path, ci);
+                return build(jsonValue.getType(), mapper, path, ci, customValues);
             }
             ObjectNode obj = mapper.createObjectNode();
             for (BeanPropertyDefinition prop : desc.findProperties()) {
-                obj.set(prop.getName(), build(prop.getPrimaryType(), mapper, path, ci));
+                obj.set(prop.getName(), build(prop.getPrimaryType(), mapper, path, ci, customValues));
             }
             return obj;
         } finally {

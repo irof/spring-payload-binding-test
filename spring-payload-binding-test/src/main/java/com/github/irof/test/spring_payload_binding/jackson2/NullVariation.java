@@ -16,23 +16,10 @@ import java.util.Map;
  */
 public final class NullVariation implements Jackson2Variation {
 
-    private final Map<Class<?>, JsonNode> customValues;
-
     /**
-     * カスタム値なしで動作するコンストラクタ。
+     * コンストラクタ
      */
     public NullVariation() {
-        this(Map.of());
-    }
-
-    /**
-     * 型ごとのカスタム値を指定するコンストラクタ。
-     * 指定した型に対してはカスタム値が null より優先されます。
-     *
-     * @param customValues 型からカスタム値へのマッピング
-     */
-    public NullVariation(Map<Class<?>, JsonNode> customValues) {
-        this.customValues = Map.copyOf(customValues);
     }
 
     @Override
@@ -42,11 +29,16 @@ public final class NullVariation implements Jackson2Variation {
 
     @Override
     public JsonNode build(JavaType type, ObjectMapper objectMapper) {
+        return buildWithCustomValues(type, objectMapper, Map.of());
+    }
+
+    @Override
+    public JsonNode buildWithCustomValues(JavaType type, ObjectMapper mapper, Map<Class<?>, JsonNode> customValues) {
         JsonNode custom = customValues.get(type.getRawClass());
         if (custom != null) return custom;
-        BeanDescription desc = objectMapper.getSerializationConfig().introspect(type);
+        BeanDescription desc = mapper.getSerializationConfig().introspect(type);
         if (desc.findJsonValueAccessor() != null) return NullNode.instance;
-        ObjectNode obj = objectMapper.createObjectNode();
+        ObjectNode obj = mapper.createObjectNode();
         for (BeanPropertyDefinition prop : desc.findProperties()) {
             JsonNode propCustom = customValues.get(prop.getPrimaryType().getRawClass());
             obj.set(prop.getName(), propCustom != null ? propCustom : NullNode.instance);

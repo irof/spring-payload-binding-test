@@ -22,23 +22,10 @@ import java.util.UUID;
  */
 public final class SampleVariation implements Jackson3Variation {
 
-    private final Map<Class<?>, JsonNode> customValues;
-
     /**
-     * カスタムサンプル値なしで動作するコンストラクタ。
+     * コンストラクタ
      */
     public SampleVariation() {
-        this(Map.of());
-    }
-
-    /**
-     * 型ごとのカスタムサンプル値を指定するコンストラクタ。
-     * 指定した型に対してはカスタム値が組み込みのデフォルト値より優先されます。
-     *
-     * @param customValues 型からサンプル値へのマッピング
-     */
-    public SampleVariation(Map<Class<?>, JsonNode> customValues) {
-        this.customValues = Map.copyOf(customValues);
     }
 
     @Override
@@ -48,13 +35,18 @@ public final class SampleVariation implements Jackson3Variation {
 
     @Override
     public JsonNode build(JavaType type, ObjectMapper mapper) {
-        ClassIntrospector ci = mapper.serializationConfig().classIntrospectorInstance();
-        return buildInternal(type, new HashSet<>(), ci, mapper);
+        return buildWithCustomValues(type, mapper, Map.of());
     }
 
-    private JsonNode buildInternal(JavaType type, Set<JavaType> path, ClassIntrospector ci, ObjectMapper mapper) {
+    @Override
+    public JsonNode buildWithCustomValues(JavaType type, ObjectMapper mapper, Map<Class<?>, JsonNode> customValues) {
+        ClassIntrospector ci = mapper.serializationConfig().classIntrospectorInstance();
+        return buildInternal(type, new HashSet<>(), ci, mapper, customValues);
+    }
+
+    private JsonNode buildInternal(JavaType type, Set<JavaType> path, ClassIntrospector ci, ObjectMapper mapper, Map<Class<?>, JsonNode> customValues) {
         if (type.isReferenceType()) {
-            return buildInternal(type.getReferencedType(), path, ci, mapper);
+            return buildInternal(type.getReferencedType(), path, ci, mapper, customValues);
         }
         Class<?> raw = type.getRawClass();
         JsonNode custom = customValues.get(raw);
@@ -64,13 +56,13 @@ public final class SampleVariation implements Jackson3Variation {
 
         if (type.isArrayType() || type.isCollectionLikeType()) {
             ArrayNode arr = mapper.createArrayNode();
-            arr.add(buildInternal(type.getContentType(), path, ci, mapper));
+            arr.add(buildInternal(type.getContentType(), path, ci, mapper, customValues));
             return arr;
         }
         if (type.isMapLikeType()) {
             ObjectNode obj = mapper.createObjectNode();
-            JsonNode keyNode = buildInternal(type.getKeyType(), path, ci, mapper);
-            obj.set(keyNode.asString(), buildInternal(type.getContentType(), path, ci, mapper));
+            JsonNode keyNode = buildInternal(type.getKeyType(), path, ci, mapper, customValues);
+            obj.set(keyNode.asString(), buildInternal(type.getContentType(), path, ci, mapper, customValues));
             return obj;
         }
         if (PayloadTypeUtils.isFrameworkType(raw)) {
@@ -83,11 +75,11 @@ public final class SampleVariation implements Jackson3Variation {
             var desc = ci.introspectForSerialization(type, ci.introspectClassAnnotations(type));
             AnnotatedMember jsonValue = desc.findJsonValueAccessor();
             if (jsonValue != null) {
-                return buildInternal(jsonValue.getType(), path, ci, mapper);
+                return buildInternal(jsonValue.getType(), path, ci, mapper, customValues);
             }
             ObjectNode obj = mapper.createObjectNode();
             for (BeanPropertyDefinition prop : desc.findProperties()) {
-                obj.set(prop.getName(), buildInternal(prop.getPrimaryType(), path, ci, mapper));
+                obj.set(prop.getName(), buildInternal(prop.getPrimaryType(), path, ci, mapper, customValues));
             }
             return obj;
         } finally {

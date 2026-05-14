@@ -86,13 +86,7 @@ class Jackson3PayloadTestContext implements PayloadTestContext {
             return j3v;
         }
         if (variation instanceof CustomMappingVariation cmv) {
-            Map<Class<?>, JsonNode> map = toJsonNodeMap(cmv.customValues());
-            return switch (cmv.name()) {
-                case "sample" -> new SampleVariation(map);
-                case "null" -> new NullVariation(map);
-                case "empty" -> new EmptyVariation(map);
-                default -> throw new IllegalArgumentException("Unknown variation: " + cmv.name());
-            };
+            return new CustomMappingJackson3Variation(resolveVariation(cmv.base()), toJsonNodeMap(cmv.customValues()));
         }
         return switch (variation.name()) {
             case "sample" -> Jackson3Variation.SAMPLE;

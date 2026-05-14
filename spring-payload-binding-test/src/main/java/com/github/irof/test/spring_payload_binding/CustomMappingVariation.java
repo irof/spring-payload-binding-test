@@ -9,10 +9,22 @@ import java.util.Map;
 public interface CustomMappingVariation extends Variation {
 
     /**
+     * このバリエーションの元となる Variation を返します。
+     *
+     * @return 元の Variation
+     */
+    Variation base();
+
+    /**
      * カスタム値のマッピングを返します。
      * 値は {@code String}、{@code Integer}、{@code Long}、{@code Boolean} のいずれかです。
      *
      * @return 型からカスタム値へのマッピング
      */
     Map<Class<?>, Object> customValues();
+
+    @Override
+    default String name() {
+        return base().name();
+    }
 }

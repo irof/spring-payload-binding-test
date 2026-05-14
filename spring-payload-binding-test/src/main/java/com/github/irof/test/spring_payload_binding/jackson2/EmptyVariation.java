@@ -20,23 +20,10 @@ import java.util.Set;
  */
 public final class EmptyVariation implements Jackson2Variation {
 
-    private final Map<Class<?>, JsonNode> customValues;
-
     /**
-     * カスタム値なしで動作するコンストラクタ。
+     * コンストラクタ
      */
     public EmptyVariation() {
-        this(Map.of());
-    }
-
-    /**
-     * 型ごとのカスタム値を指定するコンストラクタ。
-     * 指定した型に対してはカスタム値が空値より優先されます。
-     *
-     * @param customValues 型からカスタム値へのマッピング
-     */
-    public EmptyVariation(Map<Class<?>, JsonNode> customValues) {
-        this.customValues = Map.copyOf(customValues);
     }
 
     @Override
@@ -46,11 +33,16 @@ public final class EmptyVariation implements Jackson2Variation {
 
     @Override
     public JsonNode build(JavaType type, ObjectMapper objectMapper) {
-        return build(type, objectMapper, new HashSet<>());
+        return buildWithCustomValues(type, objectMapper, Map.of());
     }
 
-    private JsonNode build(JavaType type, ObjectMapper objectMapper, Set<JavaType> path) {
-        if (type.isReferenceType()) return build(type.getReferencedType(), objectMapper, path);
+    @Override
+    public JsonNode buildWithCustomValues(JavaType type, ObjectMapper mapper, Map<Class<?>, JsonNode> customValues) {
+        return build(type, mapper, new HashSet<>(), customValues);
+    }
+
+    private JsonNode build(JavaType type, ObjectMapper objectMapper, Set<JavaType> path, Map<Class<?>, JsonNode> customValues) {
+        if (type.isReferenceType()) return build(type.getReferencedType(), objectMapper, path, customValues);
         Class<?> raw = type.getRawClass();
         JsonNode custom = customValues.get(raw);
         if (custom != null) return custom;
@@ -64,11 +56,11 @@ public final class EmptyVariation implements Jackson2Variation {
             BeanDescription desc = objectMapper.getSerializationConfig().introspect(type);
             AnnotatedMember jsonValue = desc.findJsonValueAccessor();
             if (jsonValue != null) {
-                return build(objectMapper.constructType(jsonValue.getType()), objectMapper, path);
+                return build(objectMapper.constructType(jsonValue.getType()), objectMapper, path, customValues);
             }
             ObjectNode obj = objectMapper.createObjectNode();
             for (BeanPropertyDefinition prop : desc.findProperties()) {
-                obj.set(prop.getName(), build(prop.getPrimaryType(), objectMapper, path));
+                obj.set(prop.getName(), build(prop.getPrimaryType(), objectMapper, path, customValues));
             }
             return obj;
         } finally {

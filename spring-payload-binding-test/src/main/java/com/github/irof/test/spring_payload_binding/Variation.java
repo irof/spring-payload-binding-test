@@ -30,10 +30,10 @@ public interface Variation {
         TypeMapping mapping = new TypeMapping();
         configurer.accept(mapping);
         Map<Class<?>, Object> values = mapping.build();
-        String baseName = this.name();
+        Variation self = this;
         return new CustomMappingVariation() {
             @Override
-            public String name() { return baseName; }
+            public Variation base() { return self; }
 
             @Override
             public Map<Class<?>, Object> customValues() { return values; }
