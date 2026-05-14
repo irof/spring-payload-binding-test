@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.github.irof.test.spring_payload_binding.JacksonContextProvider;
 import com.github.irof.test.spring_payload_binding.PayloadTestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,16 +17,16 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * Jackson2 を使用した {@link com.github.irof.test.spring_payload_binding.JacksonContextProvider} の実装です。
+ * Jackson2 を使用した {@link JacksonContextProvider} の実装です。
  */
-public class JacksonContextProvider implements com.github.irof.test.spring_payload_binding.JacksonContextProvider {
+public class Jackson2ContextProvider implements JacksonContextProvider {
 
-    private static final Logger log = LoggerFactory.getLogger(JacksonContextProvider.class);
+    private static final Logger log = LoggerFactory.getLogger(Jackson2ContextProvider.class);
 
     /**
      * コンストラクタ
      */
-    public JacksonContextProvider() {
+    public Jackson2ContextProvider() {
     }
 
     @SuppressWarnings("removal")

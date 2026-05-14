@@ -1,5 +1,7 @@
 package com.github.irof.test.spring_payload_binding;
 
+import com.github.irof.test.spring_payload_binding.jackson2.Jackson2ContextProvider;
+import com.github.irof.test.spring_payload_binding.jackson3.Jackson3ContextProvider;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -116,11 +118,11 @@ public abstract class JsonBindingContractTestBase {
 
     // Jackson3 クラスを直接参照しているため、このメソッドはJackson3が利用可能な場合のみ呼び出すこと
     private JacksonContextProvider createJackson3Provider() {
-        return new com.github.irof.test.spring_payload_binding.jackson3.JacksonContextProvider();
+        return new Jackson3ContextProvider();
     }
 
     // Jackson2 クラスを直接参照しているため、このメソッドはJackson3が利用不可の場合のみ呼び出すこと
     private JacksonContextProvider createJackson2Provider() {
-        return new com.github.irof.test.spring_payload_binding.jackson2.JacksonContextProvider();
+        return new Jackson2ContextProvider();
     }
 }

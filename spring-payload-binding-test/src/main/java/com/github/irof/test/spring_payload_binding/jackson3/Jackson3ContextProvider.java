@@ -1,5 +1,6 @@
 package com.github.irof.test.spring_payload_binding.jackson3;
 
+import com.github.irof.test.spring_payload_binding.JacksonContextProvider;
 import com.github.irof.test.spring_payload_binding.PayloadTestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,17 +14,17 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * Jackson3 を使用した {@link com.github.irof.test.spring_payload_binding.JacksonContextProvider} の実装です。
+ * Jackson3 を使用した {@link JacksonContextProvider} の実装です。
  */
 @SuppressWarnings("unchecked")
-public class JacksonContextProvider implements com.github.irof.test.spring_payload_binding.JacksonContextProvider {
+public class Jackson3ContextProvider implements JacksonContextProvider {
 
-    private static final Logger log = LoggerFactory.getLogger(JacksonContextProvider.class);
+    private static final Logger log = LoggerFactory.getLogger(Jackson3ContextProvider.class);
 
     /**
      * コンストラクタ
      */
-    public JacksonContextProvider() {
+    public Jackson3ContextProvider() {
     }
 
     @Override
