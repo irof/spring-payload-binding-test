@@ -9,10 +9,8 @@ import java.util.Optional;
 /**
  * Jackson バージョン固有の API を抽象化するアダプターインタフェースです。
  *
- * <ul>
- *   <li>{@code T} = JavaType（Jackson2/3 の型表現）</li>
- *   <li>{@code N} = JsonNode（Jackson2/3 のノード型）</li>
- * </ul>
+ * @param <T> JavaType（Jackson2/3 の型表現）
+ * @param <N> JsonNode（Jackson2/3 のノード型）
  */
 public interface JacksonAdapter<T, N> {
 
@@ -32,16 +30,24 @@ public interface JacksonAdapter<T, N> {
 
     Class<?> rawClass(T type);
 
-    /** コレクション・配列・マップを含む広義のコンテナ型かどうかを返します。 */
+    /**
+     * コレクション・配列・マップを含む広義のコンテナ型かどうかを返します。
+     */
     boolean isContainerType(T type);
 
-    /** Java の {@link Type} から T を構築します。 */
+    /**
+     * Java の {@link Type} から T を構築します。
+     */
     T constructType(Type type);
 
-    /** Nth 型パラメータを返します。存在しない場合は不明型を返します。Optional/HttpEntity のアンラップに使用します。 */
+    /**
+     * Nth 型パラメータを返します。存在しない場合は不明型を返します。Optional/HttpEntity のアンラップに使用します。
+     */
     T containedTypeOrUnknown(T type, int index);
 
-    /** 型の正規文字列表現（例: {@code java.util.List<java.lang.String>}）を返します。 */
+    /**
+     * 型の正規文字列表現（例: {@code java.util.List<java.lang.String>}）を返します。
+     */
     String toCanonical(T type);
 
     // --- イントロスペクション ---
@@ -56,7 +62,8 @@ public interface JacksonAdapter<T, N> {
      */
     List<PropertyDef<T>> findProperties(T type);
 
-    record PropertyDef<P>(String name, P type) {}
+    record PropertyDef<P>(String name, P type) {
+    }
 
     // --- ノード生成 ---
 
@@ -78,29 +85,45 @@ public interface JacksonAdapter<T, N> {
 
     N arrayNode(List<N> elements);
 
-    /** Map キーなどのテキスト表現を返します。 */
+    /**
+     * Map キーなどのテキスト表現を返します。
+     */
     String nodeToText(N node);
 
-    /** {@link TypeMapping} の値（String/Integer/Long/Boolean）を N に変換します。 */
+    /**
+     * {@link TypeMapping} の値（String/Integer/Long/Boolean）を N に変換します。
+     */
     N primitiveToNode(Object value);
 
     // --- JSON 読み書き ---
 
-    /** オブジェクトを JSON 文字列にシリアライズします。 */
+    /**
+     * オブジェクトを JSON 文字列にシリアライズします。
+     */
     String writeValueAsString(Object value) throws Exception;
 
-    /** JSON 文字列を N にパースします。 */
+    /**
+     * JSON 文字列を N にパースします。
+     */
     N readTree(String json) throws Exception;
 
-    /** JSON ファイルを N にパースします。 */
+    /**
+     * JSON ファイルを N にパースします。
+     */
     N readTree(File file) throws Exception;
 
-    /** JSON 文字列を型 T に従ってデシリアライズします。 */
+    /**
+     * JSON 文字列を型 T に従ってデシリアライズします。
+     */
     Object readValue(String json, T type) throws Exception;
 
-    /** N をインデント付き JSON としてファイルに書き出します。 */
+    /**
+     * N をインデント付き JSON としてファイルに書き出します。
+     */
     void writePrettyValue(File file, N value) throws Exception;
 
-    /** N をインデント付き JSON 文字列に変換します（ログ用）。 */
+    /**
+     * N をインデント付き JSON 文字列に変換します（ログ用）。
+     */
     String toPrettyString(N node);
 }
