@@ -2,6 +2,7 @@ package com.github.irof.test.spring_payload_binding;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * 型ごとのカスタム値を設定するビルダーです。
@@ -9,7 +10,7 @@ import java.util.Map;
  */
 public final class TypeConfigurer {
 
-    private final Map<Class<?>, Object> values = new LinkedHashMap<>();
+    private final Map<Class<?>, Supplier<?>> values = new LinkedHashMap<>();
 
     TypeConfigurer() {
     }
@@ -22,7 +23,7 @@ public final class TypeConfigurer {
      * @return このインスタンス
      */
     public TypeConfigurer type(Class<?> type, String value) {
-        values.put(type, value);
+        values.put(type, () -> value);
         return this;
     }
 
@@ -34,7 +35,7 @@ public final class TypeConfigurer {
      * @return このインスタンス
      */
     public TypeConfigurer type(Class<?> type, int value) {
-        values.put(type, value);
+        values.put(type, () -> value);
         return this;
     }
 
@@ -46,7 +47,7 @@ public final class TypeConfigurer {
      * @return このインスタンス
      */
     public TypeConfigurer type(Class<?> type, long value) {
-        values.put(type, value);
+        values.put(type, () -> value);
         return this;
     }
 
@@ -58,11 +59,23 @@ public final class TypeConfigurer {
      * @return このインスタンス
      */
     public TypeConfigurer type(Class<?> type, boolean value) {
-        values.put(type, value);
+        values.put(type, () -> value);
         return this;
     }
 
-    Map<Class<?>, Object> build() {
+    /**
+     * 指定した型に対して動的に値を生成する Supplier を設定します。
+     *
+     * @param type     対象の型
+     * @param supplier サンプル値
+     * @return このインスタンス
+     */
+    public TypeConfigurer type(Class<?> type, Supplier<?> supplier) {
+        values.put(type, supplier);
+        return this;
+    }
+
+    Map<Class<?>, Supplier<?>> build() {
         return Map.copyOf(values);
     }
 }

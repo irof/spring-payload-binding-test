@@ -105,7 +105,7 @@ public final class PayloadTestContextImpl<T, N> implements PayloadTestContext {
     private Map<Class<?>, N> resolveCustomValues(Variation variation) {
         if (!(variation instanceof CustomMappingVariation cmv)) return Map.of();
         Map<Class<?>, N> result = new LinkedHashMap<>();
-        cmv.customValues().forEach((k, v) -> result.put(k, adapter.primitiveToNode(v)));
+        cmv.customValues().forEach((k, v) -> result.put(k, adapter.primitiveToNode(v.get())));
         return result;
     }
 
