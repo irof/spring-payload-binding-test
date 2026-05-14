@@ -5,7 +5,7 @@ import java.util.Map;
 
 /**
  * 型ごとのカスタム値を設定するビルダーです。
- * {@link Variation#customMapping} のコンシューマ引数として使用します。
+ * {@link EngineVariation#customMapping} のコンシューマ引数として使用します。
  */
 public final class TypeConfigurer {
 
