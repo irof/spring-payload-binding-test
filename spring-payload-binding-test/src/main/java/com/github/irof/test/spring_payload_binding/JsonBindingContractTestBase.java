@@ -57,10 +57,10 @@ public abstract class JsonBindingContractTestBase {
      * 各ペイロードに対して実行するバリエーション群を返します。
      * デフォルトは全ペイロードで {@link Variation#SAMPLE}, {@link Variation#NULL}, {@link Variation#EMPTY} です。
      *
-     * @param ctx ペイロードのテストコンテキスト
+     * @param payloadTestContext ペイロードのテストコンテキスト
      * @return バリエーションのリスト
      */
-    protected List<Variation> variations(PayloadTestContext ctx) {
+    protected List<Variation> variations(PayloadTestContext payloadTestContext) {
         return List.of(Variation.SAMPLE, Variation.NULL, Variation.EMPTY);
     }
 

@@ -13,13 +13,13 @@ import java.util.List;
 class SpringBoot4JsonBindingContractTest extends JsonBindingContractTestBase {
 
     @Override
-    protected List<Variation> variations(PayloadTestContext ctx) {
+    protected List<Variation> variations(PayloadTestContext payloadTestContext) {
         // primitive を含む型は NULL variation で round-trip できない
         // ({"x": null} → x=0 → serialize → {"x": 0} となり source と差が出る)
-        Class<?> raw = ctx.rawClass();
+        Class<?> raw = payloadTestContext.rawClass();
         if (raw == SearchResult.class || raw == TodoStats.class) {
             return List.of(Variation.SAMPLE, Variation.EMPTY);
         }
-        return super.variations(ctx);
+        return super.variations(payloadTestContext);
     }
 }
