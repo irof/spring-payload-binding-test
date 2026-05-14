@@ -33,12 +33,21 @@ public interface PayloadTestContext {
     Class<?> rawClass();
 
     /**
+     * fixture ファイルが存在しない場合にエンジンで JSON を生成してファイルに書き出します。
+     * テスト実行前の準備フェーズで呼び出されます。
+     *
+     * @param variation     書き出すバリエーション
+     * @param jsonDirectory fixture JSON を格納するディレクトリ
+     * @throws Exception 書き出し失敗時
+     */
+    void writeFixtureIfMissing(Variation variation, Path jsonDirectory) throws Exception;
+
+    /**
      * 指定されたバリエーションでラウンドトリップテストを実行します。
      *
-     * @param variation    テストするバリエーション
+     * @param variation     テストするバリエーション
      * @param jsonDirectory fixture JSON を格納するディレクトリ
-     * @param writeMissing fixture ファイルが存在しない場合に書き出すかどうか
      * @throws Exception テスト失敗時
      */
-    void runRoundTrip(Variation variation, Path jsonDirectory, boolean writeMissing) throws Exception;
+    void runRoundTrip(Variation variation, Path jsonDirectory) throws Exception;
 }

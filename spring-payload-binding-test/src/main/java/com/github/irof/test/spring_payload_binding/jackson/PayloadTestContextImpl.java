@@ -61,29 +61,34 @@ public final class PayloadTestContextImpl<T, N> implements PayloadTestContext {
     }
 
     @Override
-    public void runRoundTrip(Variation variation, Path jsonDirectory, boolean writeMissing) throws Exception {
+    public void writeFixtureIfMissing(Variation variation, Path jsonDirectory) throws Exception {
+        Path file = jsonDirectory
+                .resolve(payloadType.rawClass().getName())
+                .resolve(variation.name() + ".json");
+        if (Files.exists(file)) return;
+        N json = buildJson(variation);
+        Files.createDirectories(file.getParent());
+        adapter.writePrettyValue(file.toFile(), json);
+        log.info("wrote fixture: {}", file);
+    }
+
+    @Override
+    public void runRoundTrip(Variation variation, Path jsonDirectory) throws Exception {
         Path file = jsonDirectory
                 .resolve(payloadType.rawClass().getName())
                 .resolve(variation.name() + ".json");
         N source;
         String origin;
-        boolean built = !Files.exists(file);
-        if (built) {
-            source = buildJson(variation);
-            origin = "built";
-        } else {
+        if (Files.exists(file)) {
             source = adapter.readTree(file.toFile());
             origin = "file " + file;
+        } else {
+            source = buildJson(variation);
+            origin = "built";
         }
         String sourceJson = adapter.writeValueAsString(source);
 
         log.info("[{}] {} ({})\n{}", variation.name(), payloadName(), origin, adapter.toPrettyString(source));
-
-        if (built && writeMissing) {
-            Files.createDirectories(file.getParent());
-            adapter.writePrettyValue(file.toFile(), source);
-            log.info("wrote fixture: {}", file);
-        }
 
         Object instance = adapter.readValue(sourceJson, payloadType.type());
         String serialized = adapter.writeValueAsString(instance);

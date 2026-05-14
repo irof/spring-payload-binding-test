@@ -85,10 +85,14 @@ public abstract class JsonBindingContractTestBase {
     }
 
     @TestFactory
-    List<DynamicTest> everyEndpointPayloadTypeIsJsonBindable() {
+    List<DynamicTest> everyEndpointPayloadTypeIsJsonBindable() throws Exception {
+        boolean writeMissing = writeMissingFiles();
         List<DynamicTest> tests = new ArrayList<>();
         for (PayloadTestContext ctx : collectPayloadContexts(handlerMapping)) {
             for (Variation variation : variations(ctx)) {
+                if (writeMissing) {
+                    ctx.writeFixtureIfMissing(variation, jsonDirectory());
+                }
                 tests.add(DynamicTest.dynamicTest(
                         "[" + variation.name() + "] " + ctx.payloadName(),
                         () -> runWithContext(ctx, variation)));
@@ -99,7 +103,7 @@ public abstract class JsonBindingContractTestBase {
 
     private void runWithContext(PayloadTestContext ctx, Variation variation) throws Exception {
         try {
-            ctx.runRoundTrip(variation, jsonDirectory(), writeMissingFiles());
+            ctx.runRoundTrip(variation, jsonDirectory());
         } catch (Throwable t) {
             String message = ctx.payloadName() + " [" + variation.name() + "] used by:\n  "
                     + String.join("\n  ", ctx.endpoints()) + "\n"
