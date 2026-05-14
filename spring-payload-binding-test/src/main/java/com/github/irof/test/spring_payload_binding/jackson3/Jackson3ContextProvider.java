@@ -1,7 +1,7 @@
 package com.github.irof.test.spring_payload_binding.jackson3;
 
 import com.github.irof.test.spring_payload_binding.jackson.EndpointPayloadTypes;
-import com.github.irof.test.spring_payload_binding.JacksonContextProvider;
+import com.github.irof.test.spring_payload_binding.jackson.JacksonContextProvider;
 import com.github.irof.test.spring_payload_binding.PayloadTestContext;
 import com.github.irof.test.spring_payload_binding.jackson.PayloadTestContextImpl;
 import org.slf4j.Logger;

@@ -1,5 +1,6 @@
 package com.github.irof.test.spring_payload_binding;
 
+import com.github.irof.test.spring_payload_binding.jackson.JacksonContextProvider;
 import com.github.irof.test.spring_payload_binding.jackson2.Jackson2ContextProvider;
 import com.github.irof.test.spring_payload_binding.jackson3.Jackson3ContextProvider;
 import org.junit.jupiter.api.DynamicTest;

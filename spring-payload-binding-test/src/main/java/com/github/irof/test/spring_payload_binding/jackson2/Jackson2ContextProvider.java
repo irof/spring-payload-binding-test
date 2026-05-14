@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.irof.test.spring_payload_binding.jackson.EndpointPayloadTypes;
-import com.github.irof.test.spring_payload_binding.JacksonContextProvider;
+import com.github.irof.test.spring_payload_binding.jackson.JacksonContextProvider;
 import com.github.irof.test.spring_payload_binding.PayloadTestContext;
 import com.github.irof.test.spring_payload_binding.jackson.PayloadTestContextImpl;
 import org.slf4j.Logger;
