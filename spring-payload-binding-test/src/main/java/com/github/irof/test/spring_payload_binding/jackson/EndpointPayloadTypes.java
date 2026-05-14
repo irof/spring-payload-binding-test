@@ -31,8 +31,8 @@ public final class EndpointPayloadTypes {
      * @param adapter        Jackson アダプター
      * @return 収集された PayloadType のセット
      */
-    public static <T> Set<PayloadType<T>> collect(
-            RequestMappingHandlerMapping handlerMapping, TypeQueryAdapter<T> adapter) {
+    public static <T, N> Set<PayloadType<T>> collect(
+            RequestMappingHandlerMapping handlerMapping, JacksonAdapter<T, N> adapter) {
         Map<T, List<String>> accum = new LinkedHashMap<>();
         handlerMapping.getHandlerMethods().forEach((info, handler) -> {
             if (PayloadTypeUtils.isFrameworkHandler(handler)) return;
@@ -49,8 +49,8 @@ public final class EndpointPayloadTypes {
         return result;
     }
 
-    private static <T> void addUnwrapped(
-            T type, String endpoint, Map<T, List<String>> accum, TypeQueryAdapter<T> adapter) {
+    private static <T, N> void addUnwrapped(
+            T type, String endpoint, Map<T, List<String>> accum, JacksonAdapter<T, N> adapter) {
         if (type == null) return;
         Class<?> raw = adapter.rawClass(type);
         if (raw == Void.class || raw == void.class) return;

@@ -1,10 +1,6 @@
 package com.github.irof.test.spring_payload_binding.jackson3;
 
 import com.github.irof.test.spring_payload_binding.jackson.JacksonAdapter;
-import com.github.irof.test.spring_payload_binding.jackson.JsonIOAdapter;
-import com.github.irof.test.spring_payload_binding.jackson.NodeFactoryAdapter;
-import com.github.irof.test.spring_payload_binding.jackson.TypeIntrospectionAdapter;
-import com.github.irof.test.spring_payload_binding.jackson.TypeQueryAdapter;
 import tools.jackson.databind.JavaType;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
@@ -17,12 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-final class Jackson3Adapter implements
-        TypeQueryAdapter<JavaType>,
-        TypeIntrospectionAdapter<JavaType>,
-        NodeFactoryAdapter<JavaType, JsonNode>,
-        JsonIOAdapter<JavaType, JsonNode>,
-        JacksonAdapter<JavaType, JsonNode> {
+final class Jackson3Adapter implements JacksonAdapter<JavaType, JsonNode> {
 
     private final ObjectMapper mapper;
     private ClassIntrospector ci;
