@@ -13,6 +13,7 @@ import java.net.URI;
 import java.net.URL;
 import java.time.*;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -21,10 +22,23 @@ import java.util.UUID;
  */
 public final class SampleVariation implements Jackson3Variation {
 
+    private final Map<Class<?>, JsonNode> customValues;
+
     /**
-     * コンストラクタ
+     * カスタムサンプル値なしで動作するコンストラクタ。
      */
     public SampleVariation() {
+        this(Map.of());
+    }
+
+    /**
+     * 型ごとのカスタムサンプル値を指定するコンストラクタ。
+     * 指定した型に対してはカスタム値が組み込みのデフォルト値より優先されます。
+     *
+     * @param customValues 型からサンプル値へのマッピング
+     */
+    public SampleVariation(Map<Class<?>, JsonNode> customValues) {
+        this.customValues = Map.copyOf(customValues);
     }
 
     @Override
@@ -43,6 +57,8 @@ public final class SampleVariation implements Jackson3Variation {
             return buildInternal(type.getReferencedType(), path, ci, mapper);
         }
         Class<?> raw = type.getRawClass();
+        JsonNode custom = customValues.get(raw);
+        if (custom != null) return custom;
         JsonNode scalar = scalarSample(raw);
         if (scalar != null) return scalar;
 
