@@ -1,12 +1,13 @@
 package com.github.irof.test.spring_payload_binding.jackson2;
 
 import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.github.irof.test.spring_payload_binding.EndpointPayloadTypes;
 import com.github.irof.test.spring_payload_binding.JacksonContextProvider;
 import com.github.irof.test.spring_payload_binding.PayloadTestContext;
+import com.github.irof.test.spring_payload_binding.PayloadTestContextImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -32,7 +33,7 @@ public class Jackson2ContextProvider implements JacksonContextProvider {
     @SuppressWarnings("removal")
     @Override
     public Collection<? extends PayloadTestContext> collect(RequestMappingHandlerMapping mapping, List<HttpMessageConverter<?>> messageConverters) {
-        ObjectMapper mapper = messageConverters.stream()
+        var mapper = messageConverters.stream()
                 .filter(AbstractJackson2HttpMessageConverter.class::isInstance)
                 .map(AbstractJackson2HttpMessageConverter.class::cast)
                 .map(AbstractJackson2HttpMessageConverter::getObjectMapper)
@@ -46,8 +47,9 @@ public class Jackson2ContextProvider implements JacksonContextProvider {
                             .findAndAddModules()
                             .build();
                 });
-        return EndpointPayloadTypes.collect(mapping, mapper).stream()
-                .map(pt -> new Jackson2PayloadTestContext(pt, mapper))
+        var adapter = new Jackson2Adapter(mapper);
+        return EndpointPayloadTypes.collect(mapping, adapter).stream()
+                .map(pt -> new PayloadTestContextImpl<>(pt, adapter))
                 .toList();
     }
 }

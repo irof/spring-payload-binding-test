@@ -1,13 +1,8 @@
-package com.github.irof.test.spring_payload_binding.jackson2;
+package com.github.irof.test.spring_payload_binding;
 
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.irof.test.spring_payload_binding.PayloadTypeUtils;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpEntity;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import java.util.*;
@@ -21,61 +16,53 @@ public final class EndpointPayloadTypes {
      * ペイロード型と、それを使用しているエンドポイントの情報のペアです。
      *
      * @param type      ペイロードの型
+     * @param rawClass  ペイロードの raw クラス
      * @param endpoints この型を使用しているエンドポイントのリスト
      */
-    public record PayloadType(JavaType type, List<String> endpoints) {
-        public Class<?> getRawClass() {
-            return type.getRawClass();
-        }
-    }
+    public record PayloadType<T>(T type, Class<?> rawClass, List<String> endpoints) {}
 
-    /**
-     * コンストラクタ（インスタンス化抑止）
-     */
-    private EndpointPayloadTypes() {
-    }
+    private EndpointPayloadTypes() {}
 
     /**
      * RequestMappingHandlerMapping からエンドポイントのペイロード型を収集します。
      *
      * @param handlerMapping HandlerMapping
-     * @param objectMapper   ObjectMapper
+     * @param adapter        Jackson アダプター
      * @return 収集された PayloadType のセット
      */
-    public static Set<PayloadType> collect(RequestMappingHandlerMapping handlerMapping, ObjectMapper objectMapper) {
-        Map<JavaType, List<String>> accum = new LinkedHashMap<>();
+    public static <T, N> Set<PayloadType<T>> collect(
+            RequestMappingHandlerMapping handlerMapping, JacksonAdapter<T, N> adapter) {
+        Map<T, List<String>> accum = new LinkedHashMap<>();
         handlerMapping.getHandlerMethods().forEach((info, handler) -> {
             if (PayloadTypeUtils.isFrameworkHandler(handler)) return;
             String endpoint = PayloadTypeUtils.describeEndpoint(info, handler);
             for (MethodParameter p : handler.getMethodParameters()) {
                 if (p.hasParameterAnnotation(RequestBody.class)) {
-                    addUnwrapped(objectMapper.constructType(p.getGenericParameterType()), endpoint, accum);
+                    addUnwrapped(adapter.constructType(p.getGenericParameterType()), endpoint, accum, adapter);
                 }
             }
-            addUnwrapped(objectMapper.constructType(handler.getMethod().getGenericReturnType()), endpoint, accum);
+            addUnwrapped(adapter.constructType(handler.getMethod().getGenericReturnType()), endpoint, accum, adapter);
         });
-        Set<PayloadType> result = new LinkedHashSet<>();
-        accum.forEach((type, eps) -> result.add(new PayloadType(type, List.copyOf(eps))));
+        Set<PayloadType<T>> result = new LinkedHashSet<>();
+        accum.forEach((type, eps) -> result.add(new PayloadType<>(type, adapter.rawClass(type), List.copyOf(eps))));
         return result;
     }
 
-    private static void addUnwrapped(JavaType type, String endpoint, Map<JavaType, List<String>> accum) {
+    private static <T, N> void addUnwrapped(
+            T type, String endpoint, Map<T, List<String>> accum, JacksonAdapter<T, N> adapter) {
         if (type == null) return;
-        Class<?> raw = type.getRawClass();
-
+        Class<?> raw = adapter.rawClass(type);
         if (raw == Void.class || raw == void.class) return;
         if (HttpEntity.class.isAssignableFrom(raw) || Optional.class.isAssignableFrom(raw)) {
-            addUnwrapped(type.containedTypeOrUnknown(0), endpoint, accum);
+            addUnwrapped(adapter.containedTypeOrUnknown(type, 0), endpoint, accum, adapter);
             return;
         }
-        if (type.isContainerType()) {
-            addUnwrapped(type.getContentType(), endpoint, accum);
+        if (adapter.isContainerType(type)) {
+            addUnwrapped(adapter.contentType(type), endpoint, accum, adapter);
             return;
         }
         if (PayloadTypeUtils.isScalar(raw)) return;
         if (PayloadTypeUtils.isFrameworkType(raw)) return;
-
         accum.computeIfAbsent(type, k -> new ArrayList<>()).add(endpoint);
     }
-
 }

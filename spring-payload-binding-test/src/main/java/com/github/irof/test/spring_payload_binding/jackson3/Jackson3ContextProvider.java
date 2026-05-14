@@ -1,7 +1,9 @@
 package com.github.irof.test.spring_payload_binding.jackson3;
 
+import com.github.irof.test.spring_payload_binding.EndpointPayloadTypes;
 import com.github.irof.test.spring_payload_binding.JacksonContextProvider;
 import com.github.irof.test.spring_payload_binding.PayloadTestContext;
+import com.github.irof.test.spring_payload_binding.PayloadTestContextImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.converter.AbstractJacksonHttpMessageConverter;
@@ -29,7 +31,7 @@ public class Jackson3ContextProvider implements JacksonContextProvider {
 
     @Override
     public Collection<? extends PayloadTestContext> collect(RequestMappingHandlerMapping mapping, List<HttpMessageConverter<?>> messageConverters) {
-        ObjectMapper mapper = messageConverters.stream()
+        var mapper = messageConverters.stream()
                 .filter(AbstractJacksonHttpMessageConverter.class::isInstance)
                 .map(c -> (AbstractJacksonHttpMessageConverter<ObjectMapper>) c)
                 .map(AbstractJacksonHttpMessageConverter::getMapper)
@@ -38,8 +40,9 @@ public class Jackson3ContextProvider implements JacksonContextProvider {
                     log.warn("Jackson3 HttpMessageConverter not found; falling back to plain JsonMapper");
                     return JsonMapper.builder().build();
                 });
-        return EndpointPayloadTypes.collect(mapping, mapper).stream()
-                .map(pt -> new Jackson3PayloadTestContext(pt, mapper))
+        var adapter = new Jackson3Adapter(mapper);
+        return EndpointPayloadTypes.collect(mapping, adapter).stream()
+                .map(pt -> new PayloadTestContextImpl<>(pt, adapter))
                 .toList();
     }
 }

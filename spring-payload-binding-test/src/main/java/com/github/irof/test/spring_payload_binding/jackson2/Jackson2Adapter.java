@@ -4,17 +4,19 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.*;
-import com.github.irof.test.spring_payload_binding.VariationAdapter;
+import com.github.irof.test.spring_payload_binding.JacksonAdapter;
 
+import java.io.File;
+import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-final class Jackson2VariationAdapter implements VariationAdapter<JavaType, JsonNode> {
+final class Jackson2Adapter implements JacksonAdapter<JavaType, JsonNode> {
 
     private final ObjectMapper mapper;
 
-    Jackson2VariationAdapter(ObjectMapper mapper) {
+    Jackson2Adapter(ObjectMapper mapper) {
         this.mapper = mapper;
     }
 
@@ -38,6 +40,18 @@ final class Jackson2VariationAdapter implements VariationAdapter<JavaType, JsonN
 
     @Override
     public Class<?> rawClass(JavaType type) { return type.getRawClass(); }
+
+    @Override
+    public boolean isContainerType(JavaType type) { return type.isContainerType(); }
+
+    @Override
+    public JavaType constructType(Type type) { return mapper.constructType(type); }
+
+    @Override
+    public JavaType containedTypeOrUnknown(JavaType type, int index) { return type.containedTypeOrUnknown(index); }
+
+    @Override
+    public String toCanonical(JavaType type) { return type.toCanonical(); }
 
     @Override
     public Optional<JavaType> findJsonValueType(JavaType type) {
@@ -102,4 +116,33 @@ final class Jackson2VariationAdapter implements VariationAdapter<JavaType, JsonN
             default -> throw new IllegalArgumentException("Unsupported value type: " + value.getClass());
         };
     }
+
+    @Override
+    public String writeValueAsString(Object value) throws Exception {
+        return mapper.writeValueAsString(value);
+    }
+
+    @Override
+    public JsonNode readTree(String json) throws Exception {
+        return mapper.readTree(json);
+    }
+
+    @Override
+    public JsonNode readTree(File file) throws Exception {
+        return mapper.readTree(file);
+    }
+
+    @Override
+    public Object readValue(String json, JavaType type) throws Exception {
+        return mapper.readValue(json, type);
+    }
+
+    @Override
+    @SuppressWarnings("removal")
+    public void writePrettyValue(File file, JsonNode value) throws Exception {
+        mapper.writerWithDefaultPrettyPrinter().writeValue(file, value);
+    }
+
+    @Override
+    public String toPrettyString(JsonNode node) { return node.toPrettyString(); }
 }

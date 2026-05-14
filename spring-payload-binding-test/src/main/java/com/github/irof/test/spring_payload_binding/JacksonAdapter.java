@@ -1,5 +1,7 @@
 package com.github.irof.test.spring_payload_binding;
 
+import java.io.File;
+import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -12,7 +14,7 @@ import java.util.Optional;
  *   <li>{@code N} = JsonNode（Jackson2/3 のノード型）</li>
  * </ul>
  */
-public interface VariationAdapter<T, N> {
+public interface JacksonAdapter<T, N> {
 
     // --- 型クエリ ---
 
@@ -29,6 +31,18 @@ public interface VariationAdapter<T, N> {
     T keyType(T type);
 
     Class<?> rawClass(T type);
+
+    /** コレクション・配列・マップを含む広義のコンテナ型かどうかを返します。 */
+    boolean isContainerType(T type);
+
+    /** Java の {@link Type} から T を構築します。 */
+    T constructType(Type type);
+
+    /** Nth 型パラメータを返します。存在しない場合は不明型を返します。Optional/HttpEntity のアンラップに使用します。 */
+    T containedTypeOrUnknown(T type, int index);
+
+    /** 型の正規文字列表現（例: {@code java.util.List<java.lang.String>}）を返します。 */
+    String toCanonical(T type);
 
     // --- イントロスペクション ---
 
@@ -69,4 +83,24 @@ public interface VariationAdapter<T, N> {
 
     /** {@link TypeMapping} の値（String/Integer/Long/Boolean）を N に変換します。 */
     N primitiveToNode(Object value);
+
+    // --- JSON 読み書き ---
+
+    /** オブジェクトを JSON 文字列にシリアライズします。 */
+    String writeValueAsString(Object value) throws Exception;
+
+    /** JSON 文字列を N にパースします。 */
+    N readTree(String json) throws Exception;
+
+    /** JSON ファイルを N にパースします。 */
+    N readTree(File file) throws Exception;
+
+    /** JSON 文字列を型 T に従ってデシリアライズします。 */
+    Object readValue(String json, T type) throws Exception;
+
+    /** N をインデント付き JSON としてファイルに書き出します。 */
+    void writePrettyValue(File file, N value) throws Exception;
+
+    /** N をインデント付き JSON 文字列に変換します（ログ用）。 */
+    String toPrettyString(N node);
 }

@@ -7,7 +7,7 @@ import java.util.*;
 
 /**
  * バリエーション別の JSON 構築ロジックを提供するエンジンクラスです。
- * {@link VariationAdapter} を通じて Jackson バージョン固有の API を抽象化することで、
+ * {@link JacksonAdapter} を通じて Jackson バージョン固有の API を抽象化することで、
  * 全バリエーションのロジックをここに一元化しています。
  *
  * @param <T> JavaType（Jackson バージョン固有の型表現）
@@ -15,9 +15,9 @@ import java.util.*;
  */
 public final class VariationEngine<T, N> {
 
-    private final VariationAdapter<T, N> adapter;
+    private final JacksonAdapter<T, N> adapter;
 
-    public VariationEngine(VariationAdapter<T, N> adapter) {
+    public VariationEngine(JacksonAdapter<T, N> adapter) {
         this.adapter = adapter;
     }
 
