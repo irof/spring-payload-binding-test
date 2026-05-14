@@ -1,8 +1,6 @@
 package com.github.irof.test.spring_payload_binding;
 
 import com.github.irof.test.spring_payload_binding.jackson.JacksonContextProvider;
-import com.github.irof.test.spring_payload_binding.jackson2.Jackson2ContextProvider;
-import com.github.irof.test.spring_payload_binding.jackson3.Jackson3ContextProvider;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +48,7 @@ public abstract class JsonBindingContractTestBase {
      * @return テストコンテキストのコレクション
      */
     protected Collection<? extends PayloadTestContext> collectPayloadContexts(RequestMappingHandlerMapping handlerMapping) {
-        return detectProvider().collect(handlerMapping, handlerAdapter.getMessageConverters());
+        return JacksonContextProvider.detectProvider().collect(handlerMapping, handlerAdapter.getMessageConverters());
     }
 
     /**
@@ -112,22 +110,4 @@ public abstract class JsonBindingContractTestBase {
         }
     }
 
-    private JacksonContextProvider detectProvider() {
-        try {
-            Class.forName("tools.jackson.databind.ObjectMapper");
-            return createJackson3Provider();
-        } catch (ClassNotFoundException e) {
-            return createJackson2Provider();
-        }
-    }
-
-    // Jackson3 クラスを直接参照しているため、このメソッドはJackson3が利用可能な場合のみ呼び出すこと
-    private JacksonContextProvider createJackson3Provider() {
-        return new Jackson3ContextProvider();
-    }
-
-    // Jackson2 クラスを直接参照しているため、このメソッドはJackson3が利用不可の場合のみ呼び出すこと
-    private JacksonContextProvider createJackson2Provider() {
-        return new Jackson2ContextProvider();
-    }
 }
