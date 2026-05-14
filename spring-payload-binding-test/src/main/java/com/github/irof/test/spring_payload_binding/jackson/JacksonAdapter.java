@@ -1,4 +1,6 @@
-package com.github.irof.test.spring_payload_binding;
+package com.github.irof.test.spring_payload_binding.jackson;
+
+import com.github.irof.test.spring_payload_binding.TypeMapping;
 
 import java.io.File;
 import java.lang.reflect.Type;
@@ -9,8 +11,8 @@ import java.util.Optional;
 /**
  * Jackson バージョン固有の API を抽象化するアダプターインタフェースです。
  *
- * @param <T> JavaType（Jackson2/3 の型表現）
- * @param <N> JsonNode（Jackson2/3 のノード型）
+ * @param <T> JavaType（JacksonのJava型表現）
+ * @param <N> JsonNode（Jacksonのノード型）
  */
 public interface JacksonAdapter<T, N> {
 

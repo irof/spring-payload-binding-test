@@ -1,5 +1,6 @@
-package com.github.irof.test.spring_payload_binding;
+package com.github.irof.test.spring_payload_binding.jackson;
 
+import com.github.irof.test.spring_payload_binding.PayloadTypeUtils;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpEntity;
 import org.springframework.web.bind.annotation.RequestBody;

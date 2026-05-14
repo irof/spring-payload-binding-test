@@ -1,5 +1,6 @@
-package com.github.irof.test.spring_payload_binding;
+package com.github.irof.test.spring_payload_binding.jackson;
 
+import com.github.irof.test.spring_payload_binding.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,8 +16,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * {@link JacksonAdapter} を使用した {@link PayloadTestContext} の実装です。
  * Jackson バージョンに依存しない共通実装です。
  *
- * @param <T> JavaType（Jackson バージョン固有の型表現）
- * @param <N> JsonNode（Jackson バージョン固有のノード型）
+ * @param <T> JavaType（JacksonのJava型表現）
+ * @param <N> JsonNode（Jacksonのノード型）
  */
 public final class PayloadTestContextImpl<T, N> implements PayloadTestContext {
 

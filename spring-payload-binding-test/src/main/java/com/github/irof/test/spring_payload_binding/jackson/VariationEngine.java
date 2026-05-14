@@ -1,4 +1,6 @@
-package com.github.irof.test.spring_payload_binding;
+package com.github.irof.test.spring_payload_binding.jackson;
+
+import com.github.irof.test.spring_payload_binding.PayloadTypeUtils;
 
 import java.net.URI;
 import java.net.URL;
@@ -10,8 +12,8 @@ import java.util.*;
  * {@link JacksonAdapter} を通じて Jackson バージョン固有の API を抽象化することで、
  * 全バリエーションのロジックをここに一元化しています。
  *
- * @param <T> JavaType（Jackson バージョン固有の型表現）
- * @param <N> JsonNode（Jackson バージョン固有のノード型）
+ * @param <T> JavaType（JacksonのJava型表現）
+ * @param <N> JsonNode（Jacksonのノード型）
  */
 public final class VariationEngine<T, N> {
 

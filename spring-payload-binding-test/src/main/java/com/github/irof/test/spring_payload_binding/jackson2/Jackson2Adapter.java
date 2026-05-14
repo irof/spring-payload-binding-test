@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.*;
-import com.github.irof.test.spring_payload_binding.JacksonAdapter;
+import com.github.irof.test.spring_payload_binding.jackson.JacksonAdapter;
 
 import java.io.File;
 import java.lang.reflect.Type;

@@ -1,6 +1,6 @@
 package com.github.irof.test.spring_payload_binding.jackson3;
 
-import com.github.irof.test.spring_payload_binding.JacksonAdapter;
+import com.github.irof.test.spring_payload_binding.jackson.JacksonAdapter;
 import tools.jackson.databind.JavaType;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
