@@ -33,6 +33,12 @@ public final class PayloadTestContextImpl<T, N> implements PayloadTestContext {
     private final JacksonAdapter<T, N> adapter;
     private final VariationEngine<T, N> engine;
 
+    /**
+     * コンストラクタ。
+     *
+     * @param payloadType ペイロード型情報
+     * @param adapter     Jackson バージョン固有の API を抽象化するアダプター
+     */
     public PayloadTestContextImpl(EndpointPayloadTypes.PayloadType<T> payloadType, JacksonAdapter<T, N> adapter) {
         this.payloadType = payloadType;
         this.adapter = adapter;

@@ -16,6 +16,7 @@ public final class EndpointPayloadTypes {
     /**
      * ペイロード型と、それを使用しているエンドポイントの情報のペアです。
      *
+     * @param <T>       Jackson の型表現
      * @param type      ペイロードの型
      * @param rawClass  ペイロードの raw クラス
      * @param endpoints この型を使用しているエンドポイントのリスト
@@ -27,6 +28,8 @@ public final class EndpointPayloadTypes {
     /**
      * RequestMappingHandlerMapping からエンドポイントのペイロード型を収集します。
      *
+     * @param <T>            Jackson の型表現
+     * @param <N>            Jackson のノード型
      * @param handlerMapping HandlerMapping
      * @param adapter        Jackson アダプター
      * @return 収集された PayloadType のセット

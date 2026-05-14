@@ -19,12 +19,21 @@ public final class VariationEngine<T, N> {
 
     private final JacksonAdapter<T, N> adapter;
 
+    /**
+     * コンストラクタ。
+     *
+     * @param adapter Jackson バージョン固有の API を抽象化するアダプター
+     */
     public VariationEngine(JacksonAdapter<T, N> adapter) {
         this.adapter = adapter;
     }
 
     /**
      * 全フィールドにサンプル値を埋めた JSON を構築します。
+     *
+     * @param type         構築対象の型
+     * @param customValues 型をキーとするカスタム値のマップ
+     * @return 構築した JSON ノード
      */
     public N buildSample(T type, Map<Class<?>, N> customValues) {
         return buildSampleInternal(type, new HashSet<>(), customValues);
@@ -106,6 +115,10 @@ public final class VariationEngine<T, N> {
     /**
      * 全フィールドを null にした JSON を構築します。
      * {@code @JsonValue} 型の場合は top-level null を返します。
+     *
+     * @param type         構築対象の型
+     * @param customValues 型をキーとするカスタム値のマップ
+     * @return 構築した JSON ノード
      */
     public N buildNull(T type, Map<Class<?>, N> customValues) {
         N custom = customValues.get(adapter.rawClass(type));
@@ -123,6 +136,10 @@ public final class VariationEngine<T, N> {
     /**
      * 空/ゼロ値を埋めた JSON を構築します。
      * String→"", コレクション→[], primitive→デフォルト値 (0/false)
+     *
+     * @param type         構築対象の型
+     * @param customValues 型をキーとするカスタム値のマップ
+     * @return 構築した JSON ノード
      */
     public N buildEmpty(T type, Map<Class<?>, N> customValues) {
         return buildEmptyInternal(type, new HashSet<>(), customValues);
