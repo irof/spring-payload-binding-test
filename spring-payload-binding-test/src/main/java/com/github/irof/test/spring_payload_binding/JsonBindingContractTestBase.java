@@ -61,7 +61,7 @@ public abstract class JsonBindingContractTestBase {
      * @return バリエーションのリスト
      */
     protected List<Variation> variations(PayloadTestContext ctx) {
-        return List.of(Variation.SAMPLE, Variation.NULL, Variation.EMPTY);
+        return List.of(EngineVariation.SAMPLE, EngineVariation.NULL, EngineVariation.EMPTY);
     }
 
     /**

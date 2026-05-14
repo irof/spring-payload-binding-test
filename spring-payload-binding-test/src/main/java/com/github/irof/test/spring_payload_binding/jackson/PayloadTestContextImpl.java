@@ -80,14 +80,18 @@ public final class PayloadTestContextImpl<T, N> implements PayloadTestContext {
         assertEquals(normalizedSource, actual, "round-trip JSON differs from source");
     }
 
-    private N buildJson(Variation variation) {
+    private N buildJson(Variation variation) throws Exception {
+        if (variation instanceof GenerativeVariation gv) {
+            return adapter.readTree(gv.buildJson(payloadType.rawClass()));
+        }
         Map<Class<?>, N> customValues = resolveCustomValues(variation);
-        return switch (resolveBaseName(variation)) {
+        return switch (variation.name()) {
             case "sample" -> engine.buildSample(payloadType.type(), customValues);
             case "null"   -> engine.buildNull(payloadType.type(), customValues);
             case "empty"  -> engine.buildEmpty(payloadType.type(), customValues);
             default -> throw new IllegalArgumentException(
-                    "Unknown variation: " + variation.name() + ". Use Variation.SAMPLE/NULL/EMPTY.");
+                    "Unknown variation: " + variation.name()
+                    + ". Use EngineVariation.SAMPLE/NULL/EMPTY or implement GenerativeVariation.");
         };
     }
 
@@ -98,7 +102,4 @@ public final class PayloadTestContextImpl<T, N> implements PayloadTestContext {
         return result;
     }
 
-    private static String resolveBaseName(Variation variation) {
-        return variation instanceof CustomMappingVariation cmv ? resolveBaseName(cmv.base()) : variation.name();
-    }
 }
