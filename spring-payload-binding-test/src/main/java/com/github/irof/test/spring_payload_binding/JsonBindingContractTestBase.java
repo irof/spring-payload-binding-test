@@ -69,6 +69,7 @@ public abstract class JsonBindingContractTestBase {
      * @return JSONディレクトリのパス
      */
     protected Path jsonDirectory() {
+        // FIXME: 相対パスなので構成や実行の仕方によって安定しない
         return Path.of("src/test/resources/json-binding");
     }
 
